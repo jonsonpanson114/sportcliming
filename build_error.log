@@ -1,0 +1,27 @@
+
+> sportcliming@0.1.0 build
+> next build
+
+笞 `images.domains` is deprecated in favor of `images.remotePatterns`. Please update next.config.ts to protect your application from malicious users.
+笆ｲ Next.js 16.1.6 (Turbopack)
+- Environments: .env.local, .env
+
+  Creating an optimized production build ...
+笨・Compiled successfully in 11.6s
+  Running TypeScript ...
+  Collecting page data using 15 workers ...
+Error [PrismaClientConstructorValidationError]: Using engine type "client" requires either "adapter" or "accelerateUrl" to be provided to PrismaClient constructor.
+Read more at https://pris.ly/d/client-constructor
+    at module evaluation (C:\Users\jonso\OneDrive\Desktop\claude\sportcliming\.next\server\chunks\[root-of-the-server]__94eb1dd9._.js:1:1167)
+    at instantiateModule (C:\Users\jonso\OneDrive\Desktop\claude\sportcliming\.next\server\chunks\[turbopack]_runtime.js:740:9)
+    at getOrInstantiateModuleFromParent (C:\Users\jonso\OneDrive\Desktop\claude\sportcliming\.next\server\chunks\[turbopack]_runtime.js:763:12)
+    at Context.esmImport [as i] (C:\Users\jonso\OneDrive\Desktop\claude\sportcliming\.next\server\chunks\[turbopack]_runtime.js:228:20)
+    at module evaluation (C:\Users\jonso\OneDrive\Desktop\claude\sportcliming\.next\server\chunks\[root-of-the-server]__94eb1dd9._.js:1:1502)
+    at instantiateModule (C:\Users\jonso\OneDrive\Desktop\claude\sportcliming\.next\server\chunks\[turbopack]_runtime.js:740:9)
+    at instantiateRuntimeModule (C:\Users\jonso\OneDrive\Desktop\claude\sportcliming\.next\server\chunks\[turbopack]_runtime.js:768:12)
+
+> Build error occurred
+Error: Failed to collect page data for /api/search
+    at ignore-listed frames {
+  type: 'Error'
+}

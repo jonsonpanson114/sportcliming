@@ -1,0 +1,97 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:../dev.db"
+}
+
+// 動画
+model Video {
+  id                  String    @id @default(cuid())
+  youtubeId           String    @unique
+  title               String
+  description         String?
+  thumbnailUrl        String?
+  publishedAt         DateTime
+  transcript          String?
+  summary             String?
+  summaryData         String?   // JSON: {keyPoints, techniques, difficultyLevel}
+  difficultyLevel     String?   // beginner, intermediate, advanced
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+}
+
+// お気に入り
+model Favorite {
+  id        String   @id @default(cuid())
+  videoId   String   @unique
+  createdAt DateTime @default(now())
+}
+
+// 視聴履歴
+model History {
+  id        String   @id @default(cuid())
+  videoId   String   @unique
+  watchedAt DateTime @default(now())
+}
+
+// コツ
+model Tip {
+  id          String   @id @default(cuid())
+  title       String
+  content     String
+  category    String   // technique, training, mental, equipment
+  difficulty  String?  // beginner, intermediate, advanced
+  videoIds    String   // JSON: 関連する動画ID
+  createdAt   DateTime @default(now())
+}
+
+// 練習メニュー
+model PracticeMenu {
+  id        String   @id @default(cuid())
+  content   String
+  createdAt DateTime @default(now())
+}
+
+// クイズ
+model Quiz {
+  id        String   @id @default(cuid())
+  videoId   String
+  question  String
+  options   String   // JSON: ["A", "B", "C", "D"]
+  answer    String   // 正解の選択肢
+  createdAt DateTime @default(now())
+}
+
+// 動画メモ
+model VideoNote {
+  id        String   @id @default(cuid())
+  videoId   String   @unique
+  note      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// 練習記録
+model PracticeRecord {
+  id           String   @id @default(cuid())
+  gymName      String?
+  date         DateTime @default(now())
+  duration     Int?     // 練習時間（分）
+  practiceMenuId String?  // 今日の練習メニューへの参照
+  videoId      String?  // 参照した動画ID
+  routes       String   // JSON: [{grade, attempts, success, notes}]
+  reflection   String?
+  nextGoal     String?
+  createdAt    DateTime @default(now())
+}
+
+model QASession {
+  id         String   @id @default(cuid())
+  question   String
+  answer     String
+  sources    String?  // JSON: video IDs
+  createdAt  DateTime @default(now())
+}
