@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
-import { generateText } from '@/lib/gemini/client';
-import { createSummaryPrompt } from '@/lib/gemini/prompts';
+import { generateText, parseJsonResponse } from '@/lib/gemini/client';
+import { createSummaryPrompt, type SummaryResult } from '@/lib/gemini/prompts';
 
 /**
  * POST /api/summary - 動画要約を生成する
@@ -51,19 +51,29 @@ export async function POST(request: Request) {
     const prompt = createSummaryPrompt(video.title, video.transcript);
 
     // 要約を生成
-    const result = await generateText(prompt);
+    const summaryResultText = await generateText(prompt);
+    const summaryResult = parseJsonResponse<SummaryResult>(summaryResultText);
+
+    if (!summaryResult) {
+      return NextResponse.json(
+        { error: '要約の生成に失敗しました' },
+        { status: 500 }
+      );
+    }
 
     // データベースに保存
     await prisma.video.update({
       where: { id: videoId },
       data: {
-        summary: result,
-        summaryData: result, // JSONとして保存
+        summary: summaryResult.summary,
+        summaryData: JSON.stringify(summaryResult),
+        difficultyLevel: summaryResult.difficultyLevel,
       },
     });
 
     return NextResponse.json({
-      summary: result,
+      summary: summaryResult.summary,
+      summaryData: summaryResult,
       cached: false,
     });
   } catch (error) {
