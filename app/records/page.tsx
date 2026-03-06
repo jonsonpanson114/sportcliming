@@ -154,6 +154,51 @@ export default function RecordsPage() {
           <p className="text-white/40 text-sm">あなたの成長の軌跡</p>
         </header>
 
+        {/* Activity Pulse Summary */}
+        <section className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="glass-card p-5 bg-gradient-to-br from-primary/10 to-transparent border-primary/20">
+            <p className="text-[10px] font-bold text-primary uppercase tracking-[0.2em] mb-2">総セッション</p>
+            <div className="flex items-end gap-2">
+              <span className="text-3xl font-display font-black text-white">{records.length}</span>
+              <span className="text-xs text-white/40 mb-1">回</span>
+            </div>
+          </div>
+          <div className="glass-card p-5 bg-gradient-to-br from-accent/10 to-transparent border-accent/20">
+            <p className="text-[10px] font-bold text-accent uppercase tracking-[0.2em] mb-2">今月の登攀</p>
+            <div className="flex items-end gap-2">
+              <span className="text-3xl font-display font-black text-white">
+                {records.filter(r => new Date(r.date as string).getMonth() === new Date().getMonth()).length}
+              </span>
+              <span className="text-xs text-white/40 mb-1">回</span>
+            </div>
+          </div>
+          <div className="glass-card p-5 bg-gradient-to-br from-orange-500/10 to-transparent border-orange-500/20 text-center sm:text-left">
+             <div className="h-full flex flex-col justify-center">
+                <div className="flex justify-between items-center mb-1">
+                  <span className="text-[10px] font-bold text-orange-500 uppercase tracking-widest">PULSE INTENSITY</span>
+                  <div className="flex gap-0.5">
+                    {[1,2,3,4,5].map(i => (
+                      <div key={i} className={`w-1 h-3 rounded-full ${i <= 3 ? 'bg-orange-500' : 'bg-white/10'}`} />
+                    ))}
+                  </div>
+                </div>
+                <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden">
+                  <div className="w-3/4 h-full bg-gradient-to-r from-orange-500 to-primary" />
+                </div>
+             </div>
+          </div>
+        </section>
+
+        {/* Action Button */}
+        <button 
+          onClick={handleAddRecord}
+          className="w-full p-4 glass-card border-primary/30 bg-primary/5 hover:bg-primary/10 transition-all group flex items-center justify-center gap-3"
+        >
+          <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+            <Plus className="text-primary" size={20} />
+          </div>
+          <span className="font-bold text-sm text-primary uppercase tracking-widest">新しい練習を記録する</span>
+        </button>
         {/* Records List */}
         {records.length === 0 ? (
           <div className="glass-card p-12 text-center space-y-6">
@@ -164,12 +209,6 @@ export default function RecordsPage() {
               <h3 className="text-lg font-bold text-white/80">まだ記録がありません</h3>
               <p className="text-sm text-white/40">今日の練習を記録して、変化を可視化しましょう</p>
             </div>
-            <button
-              onClick={handleAddRecord}
-              className="neo-button inline-block text-white"
-            >
-              最初の記録を作成
-            </button>
           </div>
         ) : (
           <div className="space-y-6">

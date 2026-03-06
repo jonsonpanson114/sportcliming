@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Play, MessageSquare, ClipboardList, Zap, Filter, ChevronRight, Search } from 'lucide-react';
+import { Play, MessageSquare, ClipboardList, Zap, Filter, ChevronRight, Search, RefreshCw } from 'lucide-react';
 
 interface Video {
   id: string;

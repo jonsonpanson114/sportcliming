@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Search, Trophy, Play, MessageSquare, ClipboardList, Target, Flame, RefreshCw, Layers, Zap } from 'lucide-react';
+import { Search, Trophy, Play, MessageSquare, ClipboardList, Target, Flame, RefreshCw, Layers, Zap, Plus } from 'lucide-react';
 
 interface DailyMenu {
   greeting: string;
@@ -164,27 +164,49 @@ export default function Home() {
           </motion.div>
         </section>
 
-        {/* Stats Row */}
-        <div className="grid grid-cols-2 gap-4">
-          <div className="glass-card p-4 flex items-center gap-4">
-            <div className="w-12 h-12 bg-orange-500/10 rounded-2xl flex items-center justify-center">
-              <Flame className="text-orange-500 w-6 h-6" />
-            </div>
-            <div>
-              <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest">継続日数</p>
-              <p className="text-xl font-display font-bold">7日間</p>
-            </div>
+        {/* Main Stats / Record Quick Access */}
+        <section className="space-y-4">
+          <div className="flex items-center justify-between px-1">
+            <h3 className="text-[10px] font-bold text-white/40 tracking-[0.2em] uppercase">あなたの進捗</h3>
+            <Link href="/records" className="text-xs text-primary font-bold hover:underline">全記録を見る</Link>
           </div>
-          <div className="glass-card p-4 flex items-center gap-4">
-            <div className="w-12 h-12 bg-accent/10 rounded-2xl flex items-center justify-center">
-              <Layers className="text-accent w-6 h-6" />
-            </div>
-            <div>
-              <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest">ランク</p>
-              <p className="text-xl font-display font-bold">B3 級</p>
-            </div>
+          <div className="grid grid-cols-2 gap-4">
+            <motion.div 
+              whileHover={{ y: -2 }}
+              className="glass-card p-5 relative overflow-hidden group"
+            >
+              <div className="absolute top-0 right-0 w-24 h-24 bg-orange-500/5 rounded-full blur-2xl -mr-12 -mt-12 group-hover:bg-orange-500/10 transition-colors" />
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-2 bg-orange-500/10 rounded-lg">
+                  <Flame className="text-orange-500 w-4 h-4" />
+                </div>
+                <span className="text-[10px] text-white/40 font-bold uppercase tracking-widest">継続日数</span>
+              </div>
+              <p className="text-2xl font-display font-black text-white">7 <span className="text-sm font-medium text-white/40">日間</span></p>
+            </motion.div>
+
+            <motion.div 
+              whileHover={{ y: -2 }}
+              className="glass-card p-5 relative overflow-hidden group"
+            >
+              <div className="absolute top-0 right-0 w-24 h-24 bg-accent/5 rounded-full blur-2xl -mr-12 -mt-12 group-hover:bg-accent/10 transition-colors" />
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-2 bg-accent/10 rounded-lg">
+                  <Layers className="text-accent w-4 h-4" />
+                </div>
+                <span className="text-[10px] text-white/40 font-bold uppercase tracking-widest">最高グレード</span>
+              </div>
+              <p className="text-2xl font-display font-black text-white">B3 <span className="text-sm font-medium text-white/40">級</span></p>
+            </motion.div>
           </div>
-        </div>
+
+          <Link href="/records" className="block p-4 glass-card border-primary/20 bg-primary/5 hover:bg-primary/10 transition-all text-center group">
+            <div className="flex items-center justify-center gap-2">
+              <Plus className="text-primary w-5 h-5 group-hover:scale-110 transition-transform" />
+              <span className="font-bold text-sm text-primary uppercase tracking-widest">セッションを記録する</span>
+            </div>
+          </Link>
+        </section>
 
         {/* Search Pulse */}
         <section className="space-y-4">
