@@ -20,6 +20,7 @@ export interface YouTubeChannelVideosResponse {
 
 /**
  * YouTubeチャンネルから動画を取得する
+ * search.list では description が返されないため、追加で videos.list を呼び出して詳細を取得する
  */
 export async function getChannelVideos(
   channelId: string,
@@ -36,13 +37,44 @@ export async function getChannelVideos(
       order: 'date',
     });
 
-    const videos: Video[] = (response.data.items || []).map((item) => ({
-      id: item.id?.videoId || '',
-      title: item.snippet?.title || '',
-      description: item.snippet?.description || null,
-      thumbnailUrl: item.snippet?.thumbnails?.medium?.url || item.snippet?.thumbnails?.default?.url || null,
-      publishedAt: new Date(item.snippet?.publishedAt || ''),
-    }));
+    const videoIds = (response.data.items || [])
+      .map((item) => item.id?.videoId)
+      .filter((id): id is string => id !== undefined);
+
+    if (videoIds.length === 0) {
+      return {
+        videos: [],
+        nextPageToken: response.data.nextPageToken || null,
+      };
+    }
+
+    // videos.list を使って詳細情報（description含む）を取得
+    const detailsResponse = await youtube.videos.list({
+      id: videoIds,
+      part: ['snippet', 'contentDetails'],
+      maxResults: maxResults,
+    });
+
+    const detailsMap = new Map<string, any>(
+      (detailsResponse.data.items || []).map((item) => [item.id || '', item])
+    );
+
+    const videos: Video[] = (response.data.items || [])
+      .map((item) => {
+        const videoId = item.id?.videoId;
+        if (!videoId) return null;
+
+        const details = detailsMap.get(videoId);
+
+        return {
+          id: videoId,
+          title: details?.snippet?.title || item.snippet?.title || '',
+          description: details?.snippet?.description || item.snippet?.description || null,
+          thumbnailUrl: item.snippet?.thumbnails?.medium?.url || item.snippet?.thumbnails?.default?.url || null,
+          publishedAt: new Date(item.snippet?.publishedAt || ''),
+        };
+      })
+      .filter((v): v is Video => v !== null);
 
     return {
       videos,
