@@ -47,68 +47,68 @@ export default function QAPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* ヘッダー */}
-      <header className="sticky top-0 z-50 bg-surface border-b border-gray-200">
-        <div className="max-w-md mx-auto px-4 py-3 flex items-center justify-between">
+    <div className="min-h-screen bg-[#fafafa]">
+      {/* Header */}
+      <header className="sticky top-0 z-50 bg-white border-b border-gray-200">
+        <div className="max-w-lg mx-auto px-4 h-14 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            <span className="text-2xl font-bold text-primary">🧗</span>
-            <span className="text-lg font-semibold">Climbing Coach</span>
+            <span className="text-xl font-semibold text-[#0066cc]">Climb</span>
+            <span className="text-xl font-semibold text-[#1a1a1a]">Coach</span>
           </Link>
         </div>
       </header>
 
-      {/* メインコンテンツ */}
-      <main className="max-w-md mx-auto px-4 py-6 pb-24">
-        <h1 className="text-2xl font-bold mb-6">🤔 Q&A</h1>
+      {/* Main Content */}
+      <main className="max-w-lg mx-auto px-4 py-5 pb-20">
+        <h1 className="text-xl font-semibold mb-4">Q&A</h1>
 
-        {/* 質問入力エリア */}
-        <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+        {/* Question Input */}
+        <div className="bg-white border border-gray-200 rounded-2xl p-5 mb-5">
+          <label className="block text-sm font-medium text-[#1a1a1a] mb-3">
             クライミングについて質問する
           </label>
           <textarea
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
             placeholder="例: ダイノのコツを教えて"
-            className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent min-h-[120px] resize-none"
+            className="w-full px-4 py-3 bg-[#fafafa] border border-gray-200 rounded-xl focus:outline-none focus:border-[#0066cc] min-h-[120px] resize-none text-sm"
             disabled={loading}
           />
           <button
             onClick={handleAsk}
             disabled={loading || !question.trim()}
-            className="w-full mt-4 bg-primary text-white px-6 py-3 rounded-xl font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full mt-3 bg-[#0066cc] text-white px-6 py-3 rounded-xl font-medium disabled:bg-gray-300 disabled:cursor-not-allowed"
           >
             {loading ? '考えています...' : '質問する'}
           </button>
         </div>
 
-        {/* 回答エリア */}
+        {/* Answer */}
         {answer && (
-          <div className="bg-blue-50 border-2 border-blue-200 rounded-2xl p-6 mb-6">
+          <div className="bg-[#e6f0ff] border border-[#b3d9ff] rounded-2xl p-5 mb-5">
             <div className="flex items-center gap-2 mb-3">
-              <span className="text-2xl">🧑‍🏫</span>
-              <h2 className="text-lg font-semibold text-blue-900">コーチの回答</h2>
+              <span>🧑‍🏫</span>
+              <h2 className="font-medium text-[#1a1a1a]">コーチの回答</h2>
             </div>
-            <p className="text-gray-800 whitespace-pre-wrap">{answer}</p>
+            <p className="text-sm text-[#1a1a1a] whitespace-pre-wrap leading-relaxed">{answer}</p>
           </div>
         )}
 
         {error && (
-          <div className="bg-red-50 border-2 border-red-200 rounded-2xl p-4 mb-6">
-            <p className="text-red-800">{error}</p>
+          <div className="bg-[#fee2e2] border border-[#fca5a5] rounded-xl p-4 mb-5">
+            <p className="text-sm text-[#991b1b]">{error}</p>
           </div>
         )}
 
-        {/* 例の質問 */}
-        <div className="mb-6">
-          <h2 className="text-lg font-semibold mb-3">💡 例の質問</h2>
+        {/* Examples */}
+        <div>
+          <h2 className="text-sm font-medium text-[#666] mb-3">💡 例の質問</h2>
           <div className="space-y-2">
             {exampleQuestions.map((q, i) => (
               <button
                 key={i}
                 onClick={() => setQuestion(q)}
-                className="w-full text-left px-4 py-3 bg-gray-50 hover:bg-gray-100 rounded-xl text-sm text-gray-700 transition-colors"
+                className="w-full text-left px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm text-[#666] hover:border-gray-300 active:bg-gray-50"
               >
                 {q}
               </button>
@@ -117,35 +117,49 @@ export default function QAPage() {
         </div>
       </main>
 
-      {/* ボトムナビゲーション */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-2 py-2">
-        <div className="max-w-md mx-auto flex justify-around">
+      {/* Bottom Navigation */}
+      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
+        <div className="max-w-lg mx-auto flex justify-around h-16">
           <Link
             href="/"
-            className="flex flex-col items-center gap-1 px-4 py-2 text-gray-600 hover:text-primary transition-colors"
+            className="flex-1 flex flex-col items-center justify-center gap-1 text-[#999] hover:text-[#0066cc]"
           >
-            <span className="text-xl">🏠</span>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+              <polyline points="9 22 9 12 15 12 15 22" />
+            </svg>
             <span className="text-xs font-medium">ホーム</span>
           </Link>
           <Link
             href="/videos"
-            className="flex flex-col items-center gap-1 px-4 py-2 text-gray-600 hover:text-primary transition-colors"
+            className="flex-1 flex flex-col items-center justify-center gap-1 text-[#999] hover:text-[#0066cc]"
           >
-            <span className="text-xl">📺</span>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect width="20" height="14" x="2" y="3" rx="2" ry="2" />
+              <line x1="8" x2="16" y1="21" y2="21" />
+              <line x1="12" x2="12" y1="17" y2="21" />
+            </svg>
             <span className="text-xs font-medium">動画</span>
           </Link>
           <Link
             href="/qa"
-            className="flex flex-col items-center gap-1 px-4 py-2 text-primary"
+            className="flex-1 flex flex-col items-center justify-center gap-1 text-[#0066cc]"
           >
-            <span className="text-xl">🤔</span>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+              <path d="M12 17h.01" />
+            </svg>
             <span className="text-xs font-medium">Q&A</span>
           </Link>
           <Link
             href="/records"
-            className="flex flex-col items-center gap-1 px-4 py-2 text-gray-600 hover:text-primary transition-colors"
+            className="flex-1 flex flex-col items-center justify-center gap-1 text-[#999] hover:text-[#0066cc]"
           >
-            <span className="text-xl">📋</span>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
+              <polyline points="14 2 14 8 20 8" />
+            </svg>
             <span className="text-xs font-medium">記録</span>
           </Link>
         </div>

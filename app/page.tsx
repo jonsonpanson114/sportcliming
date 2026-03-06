@@ -3,15 +3,21 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
-export default function Home() {
-  const [channelId, setChannelId] = useState('');
-  const [channelHandle, setChannelHandle] = useState('');
-  const [syncing, setSyncing] = useState(false);
-  const [fetchingChannelId, setFetchingChannelId] = useState(false);
-  const [syncStatus, setSyncStatus] = useState('');
-  const [dailyMenu, setDailyMenu] = useState<any>(null);
+interface DailyMenu {
+  greeting: string;
+  dailyMenu: Array<{
+    name: string;
+    description: string;
+    duration: string;
+    difficulty?: string;
+  }>;
+  tips?: string[];
+}
 
-  // 今日の練習メニューを取得
+export default function Home() {
+  const [dailyMenu, setDailyMenu] = useState<DailyMenu | null>(null);
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     async function fetchDailyMenu() {
       try {
@@ -22,324 +28,188 @@ export default function Home() {
         }
       } catch (error) {
         console.error('Failed to fetch daily menu:', error);
+      } finally {
+        setLoading(false);
       }
     }
-
     fetchDailyMenu();
   }, []);
 
-  const handleFetchChannelId = async () => {
-    if (!channelHandle) {
-      setSyncStatus('チャンネルハンドルを入力してください（例: @sportclimbing-coach）');
-      return;
-    }
-
-    setFetchingChannelId(true);
-    setSyncStatus('チャンネルIDを取得中...');
-
-    try {
-      const handle = channelHandle.startsWith('@') ? channelHandle : `@${channelHandle}`;
-      const response = await fetch('/api/get-channel-id', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ handle }),
-      });
-
-      const data = await response.json();
-      if (response.ok) {
-        setChannelId(data.channelId);
-        setSyncStatus(`チャンネルIDを取得しました: ${data.channelId}`);
-      } else {
-        setSyncStatus(`エラー: ${data.error}`);
-      }
-    } catch (error) {
-      setSyncStatus('エラーが発生しました');
-    } finally {
-      setFetchingChannelId(false);
-    }
-  };
-
-  const handleSync = async () => {
-    if (!channelId) {
-      setSyncStatus('チャンネルIDを入力してください');
-      return;
-    }
-
-    setSyncing(true);
-    setSyncStatus('同期中...');
-
-    try {
-      const response = await fetch('/api/sync', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ channelId, limit: 5 }),
-      });
-
-      const data = await response.json();
-      if (response.ok) {
-        setSyncStatus(`成功！${data.total} 件の動画を取得しました。`);
-      } else {
-        setSyncStatus(`エラー: ${data.error}`);
-      }
-    } catch (error) {
-      setSyncStatus('エラーが発生しました');
-    } finally {
-      setSyncing(false);
-    }
-  };
-
   return (
-    <div className="min-h-screen bg-background">
-      {/* ヘッダー */}
-      <header className="sticky top-0 z-50 bg-surface border-b border-gray-200">
-        <div className="max-w-md mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-2xl font-bold text-primary">🧗</span>
-            <span className="text-lg font-semibold">Climbing Coach</span>
-          </div>
-          <button className="p-2 rounded-full hover:bg-gray-100 transition-colors">
-            🔔
+    <div className="min-h-screen bg-[#fafafa]">
+      {/* Header */}
+      <header className="sticky top-0 z-50 bg-white border-b border-gray-200">
+        <div className="max-w-lg mx-auto px-4 h-14 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2">
+            <span className="text-xl font-semibold text-[#0066cc]">Climb</span>
+            <span className="text-xl font-semibold text-[#1a1a1a]">Coach</span>
+          </Link>
+          <button className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-gray-100">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+              <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+            </svg>
           </button>
         </div>
       </header>
 
-      {/* メインコンテンツ */}
-      <main className="max-w-md mx-auto px-4 py-6 pb-24">
-        {/* 検索バー */}
-        <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
-          <h1 className="text-xl font-bold mb-4 text-center">今日の練習は？</h1>
-          <div className="flex gap-2 mb-4">
-            <input
-              type="text"
-              placeholder="動画やテクニックを検索..."
-              className="flex-1 px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-            />
-            <button className="bg-primary text-white px-6 py-3 rounded-xl font-semibold hover:opacity-90 transition-opacity">
-              検索
-            </button>
-          </div>
-        </div>
-
-        {/* チャンネル同期（開発用） */}
-        <div className="border-t border-gray-200 pt-4 mb-6">
-          <h2 className="text-sm font-semibold mb-2 text-gray-600">YouTubeチャンネル同期</h2>
-          <div className="space-y-2">
-            <div className="flex gap-2">
-              <input
-                type="text"
-                placeholder="チャンネルハンドル（例: @sportclimbing-coach）"
-                value={channelHandle}
-                onChange={(e) => setChannelHandle(e.target.value)}
-                className="flex-1 px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
-              />
-              <button
-                onClick={handleFetchChannelId}
-                disabled={fetchingChannelId}
-                className="bg-primary text-white px-4 py-2 rounded-lg font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 text-sm"
-              >
-                {fetchingChannelId ? '取得中...' : 'ID取得'}
-              </button>
-              <input
-                type="text"
-                placeholder="チャンネルID（例: UCxxxxxx）"
-                value={channelId}
-                onChange={(e) => setChannelId(e.target.value)}
-                className="flex-1 px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
-              />
-              <button
-                onClick={handleSync}
-                disabled={syncing}
-                className="bg-secondary text-white px-4 py-2 rounded-lg font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 text-sm"
-              >
-                {syncing ? '同期中...' : '同期'}
-              </button>
-            </div>
-            {syncStatus && (
-              <p className="text-sm mt-2 text-gray-600">{syncStatus}</p>
-            )}
-          </div>
-        </div>
-
-        {/* 今日の練習メニューカード */}
-        <section className="mb-6">
-          <div
-            className="block bg-gradient-to-r from-primary to-orange-600 rounded-2xl shadow-lg p-6 text-white hover:scale-105 transition-transform"
-          >
-            <div className="flex items-center gap-3 mb-2">
-              <span className="text-3xl">🎯</span>
-              <h2 className="text-xl font-bold">今日の練習メニュー</h2>
-            </div>
-            <p className="text-sm opacity-90">
-              {dailyMenu && dailyMenu.greeting ? dailyMenu.greeting : '今日の練習へようこそ！'}
-            </p>
-          </div>
-        </section>
-
-        {/* AIおすすめの今日の練習詳細 */}
-        {dailyMenu && dailyMenu.dailyMenu && (
+      {/* Main Content */}
+      <main className="max-w-lg mx-auto px-4 py-5 pb-20">
+        {/* Today's Practice Card */}
+        {!loading && dailyMenu && (
           <section className="mb-6">
-            <div className="bg-blue-50 border-2 border-blue-200 rounded-2xl p-6">
+            <div className="bg-white border border-gray-200 rounded-2xl p-5">
               <div className="flex items-center gap-2 mb-4">
-                <span className="text-4xl">🎯</span>
-                <h2 className="text-2xl font-bold text-blue-900">{dailyMenu.greeting}</h2>
+                <span className="text-2xl">🎯</span>
+                <h1 className="text-lg font-semibold">{dailyMenu.greeting}</h1>
               </div>
 
-              <div className="space-y-4 mb-6">
-                {dailyMenu.dailyMenu.map((item: any, index: number) => (
-                  <div key={index} className="bg-white rounded-xl p-4 shadow-sm">
-                    <div className="flex justify-between items-start mb-2">
-                      <h3 className="text-lg font-semibold text-gray-900">
-                        {item.name}
-                        {item.difficulty && (
-                          <span className={'ml-2 px-2 py-1 rounded-full text-xs font-medium ' +
-                            (item.difficulty === 'beginner' ? 'bg-green-100 text-green-800' :
-                            item.difficulty === 'intermediate' ? 'bg-yellow-100 text-yellow-800' :
-                            'bg-red-100 text-red-800'
-                          )}>
-                            {item.difficulty}
-                          </span>
-                        )}
-                      </h3>
-                      <span className="text-sm text-gray-500 ml-2">{item.duration}</span>
-                    </div>
-                    <p className="text-gray-700 mb-2">{item.description}</p>
-                    <div className="flex items-center gap-2 mt-3">
-                      <button className="bg-primary text-white px-4 py-2 rounded-lg font-semibold hover:opacity-90">
-                        この練習をする
-                      </button>
+              {dailyMenu.dailyMenu.map((item, index) => (
+                <div key={index} className="bg-[#fafafa] border border-gray-100 rounded-xl p-4 mb-3">
+                  <div className="flex items-start justify-between mb-2">
+                    <h3 className="font-medium text-[#1a1a1a]">{item.name}</h3>
+                    <div className="flex items-center gap-2">
+                      {item.difficulty && (
+                        <span className={`tag tag-${item.difficulty}`}>
+                          {item.difficulty === 'beginner' ? '初級' :
+                           item.difficulty === 'intermediate' ? '中級' : '上級'}
+                        </span>
+                      )}
+                      <span className="text-xs text-[#999]">{item.duration}</span>
                     </div>
                   </div>
-                ))}
-              </div>
+                  <p className="text-sm text-[#666] leading-relaxed">{item.description}</p>
+                </div>
+              ))}
 
               {dailyMenu.tips && dailyMenu.tips.length > 0 && (
-                <div className="bg-blue-50 rounded-xl p-4 mt-4">
-                  <h3 className="font-semibold text-blue-900 mb-2">💡 今日のポイント</h3>
-                  <ul className="list-disc list-inside space-y-1">
-                    {dailyMenu.tips.map((tip: string, index: number) => (
-                      <li key={index} className="text-gray-700">{tip}</li>
+                <div className="mt-4 pt-4 border-t border-gray-100">
+                  <h3 className="font-medium text-sm text-[#666] mb-2">💡 今日のポイント</h3>
+                  <ul className="space-y-1">
+                    {dailyMenu.tips.map((tip, index) => (
+                      <li key={index} className="text-sm text-[#666] flex gap-2">
+                        <span>•</span>
+                        <span>{tip}</span>
+                      </li>
                     ))}
                   </ul>
                 </div>
               )}
-
-              <button
-                onClick={async () => {
-                  const response = await fetch('/api/daily-practice');
-                  if (response.ok) {
-                    const data = await response.json();
-                    setDailyMenu(data);
-                  }
-                }}
-                className="w-full bg-blue-600 text-white px-4 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
-              >
-                更新
-              </button>
             </div>
           </section>
         )}
 
-        {/* ストリーク表示 */}
-        <div className="bg-green-50 border-2 border-green-200 rounded-2xl p-4 mb-6 flex items-center gap-3">
-          <span className="text-4xl">🔥</span>
-          <div>
-            <div className="text-green-700 font-bold text-lg">連続7日！</div>
-            <div className="text-green-600 text-sm">続けてください！</div>
-          </div>
-        </div>
-
-        {/* 動画一覧セクション */}
+        {/* Quick Actions */}
         <section className="mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold">🔥 人気動画</h2>
+          <h2 className="text-sm font-medium text-[#666] mb-3 px-1">クイックアクション</h2>
+          <div className="grid grid-cols-2 gap-3">
             <Link
               href="/videos"
-              className="text-primary font-semibold hover:underline"
+              className="card-elevated p-4 flex flex-col items-center justify-center gap-2 active:scale-98 transition-transform"
             >
-              すべて見る →
+              <span className="text-2xl">📺</span>
+              <span className="text-sm font-medium">動画を見る</span>
+            </Link>
+            <Link
+              href="/qa"
+              className="card-elevated p-4 flex flex-col items-center justify-center gap-2 active:scale-98 transition-transform"
+            >
+              <span className="text-2xl">🤔</span>
+              <span className="text-sm font-medium">質問する</span>
+            </Link>
+            <Link
+              href="/records"
+              className="card-elevated p-4 flex flex-col items-center justify-center gap-2 active:scale-98 transition-transform"
+            >
+              <span className="text-2xl">📋</span>
+              <span className="text-sm font-medium">記録を見る</span>
+            </Link>
+            <Link
+              href="/videos"
+              className="card-elevated p-4 flex flex-col items-center justify-center gap-2 active:scale-98 transition-transform"
+            >
+              <span className="text-2xl">⭐</span>
+              <span className="text-sm font-medium">お気に入り</span>
             </Link>
           </div>
+        </section>
 
-          {/* 動画カードサンプル */}
-          <div className="space-y-4">
-            <div className="bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-lg transition-shadow">
-              <div className="relative">
-                <div className="aspect-video bg-gray-200 flex items-center justify-center">
-                  <span className="text-4xl">🎬</span>
+        {/* Recommended Videos */}
+        <section>
+          <div className="flex items-center justify-between mb-3 px-1">
+            <h2 className="text-sm font-medium text-[#666]">おすすめ動画</h2>
+            <Link href="/videos" className="text-sm text-[#0066cc] font-medium">すべて見る</Link>
+          </div>
+          <div className="space-y-3">
+            <Link href="/videos" className="block card p-0 overflow-hidden">
+              <div className="flex">
+                <div className="w-32 h-24 bg-gray-100 flex-shrink-0 flex items-center justify-center">
+                  <span className="text-3xl">🎬</span>
                 </div>
-                <button className="absolute top-3 right-3 p-2 bg-white rounded-full shadow-md hover:scale-110 transition-transform">
-                  💫
-                </button>
-              </div>
-              <div className="p-4">
-                <h3 className="font-bold text-lg mb-2">ホールド保持のコツ</h3>
-                <div className="flex items-center gap-2 text-sm text-gray-600 mb-3">
-                  <span>⏱️ 3:24</span>
-                  <span className="bg-primary/10 text-primary px-2 py-1 rounded-full text-xs">初級</span>
+                <div className="flex-1 p-3">
+                  <h3 className="font-medium text-sm mb-1 line-clamp-2">ホールド保持のコツ</h3>
+                  <span className="tag tag-beginner">初級</span>
                 </div>
-                <p className="text-gray-700 line-clamp-2">
-                  ホールドをしっかり握ることが重要です。足を置く場所も意識して、安定感を得ましょう。
-                </p>
               </div>
-            </div>
-
-            <div className="bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-lg transition-shadow">
-              <div className="relative">
-                <div className="aspect-video bg-gray-200 flex items-center justify-center">
-                  <span className="text-4xl">🎬</span>
+            </Link>
+            <Link href="/videos" className="block card p-0 overflow-hidden">
+              <div className="flex">
+                <div className="w-32 h-24 bg-gray-100 flex-shrink-0 flex items-center justify-center">
+                  <span className="text-3xl">🎬</span>
                 </div>
-                <button className="absolute top-3 right-3 p-2 bg-white rounded-full shadow-md hover:scale-110 transition-transform">
-                  💫
-                </button>
-              </div>
-              <div className="p-4">
-                <h3 className="font-bold text-lg mb-2">スタート位置の極意</h3>
-                <div className="flex items-center gap-2 text-sm text-gray-600 mb-3">
-                  <span>⏱️ 5:12</span>
-                  <span className="bg-secondary/10 text-secondary px-2 py-1 rounded-full text-xs">中級</span>
+                <div className="flex-1 p-3">
+                  <h3 className="font-medium text-sm mb-1 line-clamp-2">スタート位置の極意</h3>
+                  <span className="tag tag-intermediate">中級</span>
                 </div>
-                <p className="text-gray-700 line-clamp-2">
-                  スタート位置はルートの成功に大きく影響します。最初の3つのムーブでしっかりとることを意識しましょう。
-                </p>
               </div>
-            </div>
+            </Link>
           </div>
         </section>
       </main>
 
-      {/* ボトムナビゲーション */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-2 py-2">
-        <div className="max-w-md mx-auto flex justify-around">
+      {/* Bottom Navigation */}
+      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
+        <div className="max-w-lg mx-auto flex justify-around h-16">
           <Link
             href="/"
-            className="flex flex-col items-center gap-1 px-4 py-2 text-primary"
+            className="flex-1 flex flex-col items-center justify-center gap-1 text-[#0066cc]"
           >
-            <span className="text-xl">🏠</span>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+              <polyline points="9 22 9 12 15 12 15 22" />
+            </svg>
             <span className="text-xs font-medium">ホーム</span>
           </Link>
           <Link
             href="/videos"
-            className="flex flex-col items-center gap-1 px-4 py-2 text-gray-600 hover:text-primary transition-colors"
+            className="flex-1 flex flex-col items-center justify-center gap-1 text-[#999] hover:text-[#0066cc]"
           >
-            <span className="text-xl">📺</span>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect width="20" height="14" x="2" y="3" rx="2" ry="2" />
+              <line x1="8" x2="16" y1="21" y2="21" />
+              <line x1="12" x2="12" y1="17" y2="21" />
+            </svg>
             <span className="text-xs font-medium">動画</span>
           </Link>
           <Link
             href="/qa"
-            className="flex flex-col items-center gap-1 px-4 py-2 text-gray-600 hover:text-primary transition-colors"
+            className="flex-1 flex flex-col items-center justify-center gap-1 text-[#999] hover:text-[#0066cc]"
           >
-            <span className="text-xl">🤔</span>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+              <path d="M12 17h.01" />
+            </svg>
             <span className="text-xs font-medium">Q&A</span>
           </Link>
           <Link
             href="/records"
-            className="flex flex-col items-center gap-1 px-4 py-2 text-gray-600 hover:text-primary transition-colors"
+            className="flex-1 flex flex-col items-center justify-center gap-1 text-[#999] hover:text-[#0066cc]"
           >
-            <span className="text-xl">📋</span>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
+              <polyline points="14 2 14 8 20 8" />
+            </svg>
             <span className="text-xs font-medium">記録</span>
           </Link>
         </div>
