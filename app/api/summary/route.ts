@@ -39,16 +39,14 @@ export async function POST(request: Request) {
       });
     }
 
-    // 字幕がない場合はエラー
-    if (!video.transcript) {
-      return NextResponse.json(
-        { error: '字幕が利用できません。字幕を取得してから要約を生成してください。' },
-        { status: 400 }
-      );
+    // 字幕がない場合はdescriptionを結合して使用
+    let contentForSummary = video.transcript || '';
+    if (!contentForSummary || contentForSummary.length < 100) {
+      contentForSummary = `${video.title}\n\n${video.description || ''}`;
     }
 
     // プロンプトを作成
-    const prompt = createSummaryPrompt(video.title, video.transcript);
+    const prompt = createSummaryPrompt(video.title, contentForSummary);
 
     // 要約を生成
     const summaryResultText = await generateText(prompt);

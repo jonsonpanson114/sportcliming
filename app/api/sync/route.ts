@@ -135,13 +135,20 @@ async function processVideos(videos: Video[]) {
         },
       });
 
-      // 字幕を取得
+      // 字幕を取得（利用できない場合は空文字）
       console.log(`[Background Processing] 字幕取得中: ${video.title}`);
       const transcript = await getVideoCaptions(video.id);
 
+      // 字幕がない場合はdescriptionを結合して使用
+      let contentForSummary = transcript;
+      if (!transcript || transcript.length < 100) {
+        console.log(`[Background Processing] 字幕が不足しているためdescriptionを使用: ${video.title}`);
+        contentForSummary = `${video.title}\n\n${video.description || ''}`;
+      }
+
       // 要約を生成
       console.log(`[Background Processing] 要約生成中: ${video.title}`);
-      const summaryPrompt = createSummaryPrompt(video.title, transcript);
+      const summaryPrompt = createSummaryPrompt(video.title, contentForSummary);
       const summaryResultText = await generateText(summaryPrompt);
       const summaryResult = parseJsonResponse<SummaryResult>(summaryResultText);
 
@@ -159,7 +166,7 @@ async function processVideos(videos: Video[]) {
 
         // コツを抽出
         console.log(`[Background Processing] コツ抽出中: ${video.title}`);
-        const tipPrompt = createTipExtractionPrompt(video.title, transcript);
+        const tipPrompt = createTipExtractionPrompt(video.title, contentForSummary);
         const tipResultText = await generateText(tipPrompt);
         const tipResult = parseJsonResponse<TipResult>(tipResultText);
 

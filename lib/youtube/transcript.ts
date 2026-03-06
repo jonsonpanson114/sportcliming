@@ -33,9 +33,37 @@ export async function getVideoCaptions(videoId: string): Promise<string> {
     // テキストのみを抽出して結合
     return transcript.map(t => t.text).join('\n');
   } catch (error) {
-    console.error('Captions Error:', error);
-    console.log('Captions fallback: Using video description');
-    return await getVideoDescription(videoId);
+    console.log(`[Transcript] 字幕が利用できません: ${videoId} (${error instanceof Error ? error.message : error})`);
+    // 字幕がない場合は空文字を返す（descriptionは別途sync APIで取得済み）
+    return '';
+  }
+}
+
+/**
+ * 動画の説明文から情報を抽出する（字幕の代替）
+ * 注: sync APIでは別途descriptionを取得済みなので、ここでは主に単独呼び出し用
+ */
+export async function getVideoDescription(videoId: string): Promise<string> {
+  try {
+    const response = await youtube.videos.list({
+      id: [videoId],
+      part: ['snippet'],
+      maxResults: 1,
+    });
+
+    const item = response.data.items?.[0];
+    if (!item) {
+      throw new Error('動画が見つかりません');
+    }
+
+    const description = item.snippet?.description || '';
+    const title = item.snippet?.title || '';
+
+    // タイトルと説明文を組み合わせて返す
+    return `${title}\n\n${description}`;
+  } catch (error) {
+    console.error('Video Description Error:', error);
+    throw new Error('動画の情報を取得できませんでした');
   }
 }
 
