@@ -28,7 +28,7 @@ export async function retrieveRelevantContext(
 
     // コンテキストを作成
     const context = allVideos
-      .map((video) => `動画: ${video.title}\n要約: ${video.summary || 'なし'}\n`)
+      .map((video: any) => `動画: ${video.title}\n要約: ${video.summary || 'なし'}\n`)
       .join('\n');
 
     return {
@@ -48,7 +48,7 @@ function extractKeywords(question: string): string[] {
   // 簡単なキーワード抽出（実装は改善可能）
   const keywords = question
     .split(/[\s、。、？?！!]+/)
-    .filter((word) => word.length > 1);
+    .filter((word: string) => word.length > 1);
 
   return keywords.slice(0, 3);
 }
@@ -80,7 +80,7 @@ export async function answerQuestionWithRAG(question: string): Promise<{
     const answer = await generateText(prompt);
 
     // ソースを取得
-    const sources = videos.map((v) => v.youtubeId);
+    const sources = videos.map((v: any) => v.youtubeId);
 
     // 信頼度を計算（簡易版）
     const confidence = videos.length >= 2 ? 0.8 : videos.length === 1 ? 0.6 : 0.4;

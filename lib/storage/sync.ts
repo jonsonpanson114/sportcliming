@@ -42,11 +42,11 @@ export async function syncFromCloud(): Promise<{ synced: boolean; error?: string
   try {
     // お気に入りを取得
     const favorites = await prisma.favorite.findMany();
-    const favoriteIds = favorites.map((f) => f.videoId);
+    const favoriteIds = favorites.map((f: any) => f.videoId);
 
     // 視聴履歴を取得
     const history = await prisma.history.findMany();
-    const historyIds = history.map((h) => h.videoId);
+    const historyIds = history.map((h: any) => h.videoId);
 
     // ローカルストレージに保存
     if (typeof window !== 'undefined') {
