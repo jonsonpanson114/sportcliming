@@ -1,5 +1,3 @@
-import { getVideoById } from '../youtube/client';
-import { Video } from '@prisma/client';
 import { generateText } from './client';
 import { createQAPrompt } from './prompts';
 import { prisma } from '../db/prisma';
@@ -10,7 +8,7 @@ import { prisma } from '../db/prisma';
 export async function retrieveRelevantContext(
   question: string,
   limit: number = 5
-): Promise<{ videos: Video[]; context: string }> {
+): Promise<{ videos: any[]; context: string }> {
   try {
     // 簡単なキーワード検索
     const keywords = extractKeywords(question);
