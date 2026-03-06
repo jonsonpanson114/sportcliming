@@ -1,0 +1,11 @@
+# Standalone scripts
+check_*.ts
+sync_*.ts
+regenerate_*.ts
+verify.ts
+
+# Database files (Vercel uses PostgreSQL in production)
+*.db
+*.db-shm
+*.db-wal
+prisma/dev.db
