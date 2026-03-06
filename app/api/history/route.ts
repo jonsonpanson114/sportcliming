@@ -11,7 +11,7 @@ export async function GET() {
       take: 100,
     });
 
-    const videoIds = history.map((h) => h.videoId);
+    const videoIds = history.map((h: any) => h.videoId);
     const videos = await prisma.video.findMany({
       where: { youtubeId: { in: videoIds } },
     });

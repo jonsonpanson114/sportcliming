@@ -21,7 +21,7 @@ export async function POST(request: Request) {
         select: { title: true, summary: true },
       });
 
-      recentContent = videos.map((v) => `${v.title}: ${v.summary || ''}`).join('\n');
+      recentContent = videos.map((v: any) => `${v.title}: ${v.summary || ''}`).join('\n');
     }
 
     // プロンプトを作成
