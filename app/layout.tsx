@@ -19,8 +19,8 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: 'Summit Pulse - Climbing AI Coach',
-  description: 'AI-powered professional climbing coach for @sportclimbing-coach fans.',
+  title: 'Summit Pulse - AIクライミングコーチ',
+  description: 'AIがあなたのクライミング上達をサポート。最新のテクニック動画、コーチング、練習記録を一括管理。',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
