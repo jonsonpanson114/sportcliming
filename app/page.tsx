@@ -175,8 +175,8 @@ export default function Home() {
             </div>
             <p className="text-sm opacity-90">
               {dailyMenu && dailyMenu.greeting ? dailyMenu.greeting : '今日の練習へようこそ！'}
-            </div>
-          </Link>
+            </p>
+          </div>
         </section>
 
         {/* AIおすすめの今日の練習詳細 */}
