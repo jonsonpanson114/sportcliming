@@ -166,8 +166,7 @@ export default function Home() {
 
         {/* 今日の練習メニューカード */}
         <section className="mb-6">
-          <Link
-            href="/practice"
+          <div
             className="block bg-gradient-to-r from-primary to-orange-600 rounded-2xl shadow-lg p-6 text-white hover:scale-105 transition-transform"
           >
             <div className="flex items-center gap-3 mb-2">
@@ -176,7 +175,7 @@ export default function Home() {
             </div>
             <p className="text-sm opacity-90">
               {dailyMenu && dailyMenu.greeting ? dailyMenu.greeting : '今日の練習へようこそ！'}
-            </p>
+            </div>
           </Link>
         </section>
 
