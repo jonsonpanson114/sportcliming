@@ -39,13 +39,13 @@ export async function POST(request: Request) {
     // Vercelのタイムアウト対策として、未処理の動画を最大3件だけ同期処理する
     const existingVideos = await prisma.video.findMany({
       where: {
-        youtubeId: { in: allVideos.map(v => v.id) },
+        youtubeId: { in: allVideos.map((v: any) => v.id) },
         NOT: { summary: null }
       },
       select: { youtubeId: true }
     });
-    const processedIds = new Set(existingVideos.map(v => v.youtubeId));
-    const unprocessedVideos = allVideos.filter(v => !processedIds.has(v.id));
+    const processedIds = new Set(existingVideos.map((v: any) => v.youtubeId));
+    const unprocessedVideos = allVideos.filter((v: any) => !processedIds.has(v.id));
 
     const videosToProcess = unprocessedVideos.slice(0, Math.min(limit, 3));
 
