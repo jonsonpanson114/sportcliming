@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { motion } from 'framer-motion';
+import { Search, Trophy, Play, MessageSquare, ClipboardList, Target, Flame, RefreshCw, Layers, Zap } from 'lucide-react';
 
 interface DailyMenu {
   greeting: string;
@@ -15,6 +17,8 @@ interface DailyMenu {
 }
 
 export default function Home() {
+  const [syncing, setSyncing] = useState(false);
+  const [syncStatus, setSyncStatus] = useState('');
   const [dailyMenu, setDailyMenu] = useState<DailyMenu | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -24,7 +28,9 @@ export default function Home() {
         const response = await fetch('/api/daily-practice');
         if (response.ok) {
           const data = await response.json();
-          setDailyMenu(data);
+          // The API returns an array, but the UI expects an object or first item
+          const menuData = Array.isArray(data) ? data[0] : data;
+          setDailyMenu(menuData);
         }
       } catch (error) {
         console.error('Failed to fetch daily menu:', error);
@@ -35,182 +41,202 @@ export default function Home() {
     fetchDailyMenu();
   }, []);
 
+  const handleSync = async () => {
+    setSyncing(true);
+    setSyncStatus('SYNCING PULSE...');
+    try {
+      const response = await fetch('/api/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ channelId: 'UCBtRI97Yh3l6pZzLvBYPq8Q', limit: 5 }),
+      });
+      if (response.ok) setSyncStatus('PULSE SYNCED');
+      else setSyncStatus('SYNC FAILED');
+    } catch (error) {
+      setSyncStatus('ERROR');
+    } finally {
+      setSyncing(false);
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-[#fafafa]">
+    <div className="min-h-screen pb-28">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-white border-b border-gray-200">
-        <div className="max-w-lg mx-auto px-4 h-14 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <span className="text-xl font-semibold text-[#0066cc]">Climb</span>
-            <span className="text-xl font-semibold text-[#1a1a1a]">Coach</span>
-          </Link>
-          <button className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-gray-100">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-              <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-            </svg>
-          </button>
+      <header className="sticky top-0 z-50 backdrop-blur-md border-b border-white/10 px-6 py-4">
+        <div className="max-w-2xl mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-10 h-10 bg-gradient-to-tr from-primary to-accent rounded-xl flex items-center justify-center shadow-lg shadow-primary/20">
+              <Zap className="text-white w-6 h-6" />
+            </div>
+            <div>
+              <h1 className="text-xl font-display font-black tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-white to-white/60">
+                SUMMIT PULSE
+              </h1>
+              <p className="text-[10px] text-primary font-bold tracking-[0.2em] uppercase">AI Climbing Coach</p>
+            </div>
+          </div>
+          <div className="flex gap-4">
+            <button className="p-2 glass-card !rounded-full text-white/60 hover:text-white transition-colors">
+              <Trophy size={20} />
+            </button>
+          </div>
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="max-w-lg mx-auto px-4 py-5 pb-20">
-        {/* Today's Practice Card */}
-        {!loading && dailyMenu && (
-          <section className="mb-6">
-            <div className="bg-white border border-gray-200 rounded-2xl p-5">
-              <div className="flex items-center gap-2 mb-4">
-                <span className="text-2xl">🎯</span>
-                <h1 className="text-lg font-semibold">{dailyMenu.greeting}</h1>
-              </div>
+      <main className="max-w-2xl mx-auto px-6 py-8 space-y-10">
+        {/* Welcome Section */}
+        <section className="relative">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="space-y-2"
+          >
+            <h2 className="text-3xl font-display font-medium text-white/90">
+              Hello, <span className="text-white font-bold">Climber</span>
+            </h2>
+            <p className="text-white/40 text-sm">Your peak is waiting. Are you ready?</p>
+          </motion.div>
+        </section>
 
-              {dailyMenu.dailyMenu.map((item, index) => (
-                <div key={index} className="bg-[#fafafa] border border-gray-100 rounded-xl p-4 mb-3">
-                  <div className="flex items-start justify-between mb-2">
-                    <h3 className="font-medium text-[#1a1a1a]">{item.name}</h3>
-                    <div className="flex items-center gap-2">
-                      {item.difficulty && (
-                        <span className={`tag tag-${item.difficulty}`}>
-                          {item.difficulty === 'beginner' ? '初級' :
-                           item.difficulty === 'intermediate' ? '中級' : '上級'}
-                        </span>
-                      )}
-                      <span className="text-xs text-[#999]">{item.duration}</span>
-                    </div>
-                  </div>
-                  <p className="text-sm text-[#666] leading-relaxed">{item.description}</p>
+        {/* AI Daily Target */}
+        <section>
+          <motion.div 
+            whileHover={{ scale: 1.01 }}
+            className="group glass-card p-6 relative overflow-hidden"
+          >
+            <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-primary/20 transition-colors" />
+            
+            <div className="flex items-start justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-white/5 rounded-2xl">
+                  <Target className="text-primary w-6 h-6" />
                 </div>
-              ))}
+                <div>
+                  <h3 className="text-lg font-bold">今日の練習メニュー</h3>
+                  <p className="text-white/40 text-xs">AIが分析した最適なトレーニング</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => {
+                  setLoading(true);
+                  // Refresh logic would go here
+                  location.reload();
+                }}
+                className="p-2 text-white/40 hover:text-white transition-colors"
+                title="Refresh menu"
+              >
+                <RefreshCw size={18} />
+              </button>
+            </div>
 
-              {dailyMenu.tips && dailyMenu.tips.length > 0 && (
-                <div className="mt-4 pt-4 border-t border-gray-100">
-                  <h3 className="font-medium text-sm text-[#666] mb-2">💡 今日のポイント</h3>
-                  <ul className="space-y-1">
-                    {dailyMenu.tips.map((tip, index) => (
-                      <li key={index} className="text-sm text-[#666] flex gap-2">
-                        <span>•</span>
-                        <span>{tip}</span>
-                      </li>
-                    ))}
-                  </ul>
+            <div className="space-y-4">
+              {!loading && dailyMenu?.dailyMenu ? (
+                dailyMenu.dailyMenu.slice(0, 3).map((item: any, i: number) => (
+                  <div key={i} className="p-4 bg-white/5 rounded-2xl border border-white/5 flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="w-1.5 h-10 bg-primary/60 rounded-full shadow-[0_0_10px_rgba(56,189,248,0.5)]" />
+                      <div>
+                        <p className="font-bold text-sm">{item.name}</p>
+                        <div className="flex items-center gap-2">
+                          <p className="text-white/40 text-[10px] uppercase font-bold tracking-widest">{item.duration}</p>
+                          {item.difficulty && (
+                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-white/5 text-white/30 uppercase tracking-tighter">
+                              {item.difficulty}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <Play className="text-primary/60" size={16} />
+                  </div>
+                ))
+              ) : (
+                <div className="h-24 flex items-center justify-center border border-dashed border-white/10 rounded-2xl bg-white/[0.02]">
+                  <p className="text-white/20 text-sm font-medium animate-pulse">
+                    {loading ? 'ANALYZING PULSE...' : 'No menu available today.'}
+                  </p>
                 </div>
               )}
             </div>
-          </section>
-        )}
 
-        {/* Quick Actions */}
-        <section className="mb-6">
-          <h2 className="text-sm font-medium text-[#666] mb-3 px-1">クイックアクション</h2>
-          <div className="grid grid-cols-2 gap-3">
-            <Link
-              href="/videos"
-              className="card-elevated p-4 flex flex-col items-center justify-center gap-2 active:scale-98 transition-transform"
-            >
-              <span className="text-2xl">📺</span>
-              <span className="text-sm font-medium">動画を見る</span>
+            <Link href="/practice" className="neo-button w-full mt-6 text-center block">
+              START SESSION
             </Link>
-            <Link
-              href="/qa"
-              className="card-elevated p-4 flex flex-col items-center justify-center gap-2 active:scale-98 transition-transform"
-            >
-              <span className="text-2xl">🤔</span>
-              <span className="text-sm font-medium">質問する</span>
-            </Link>
-            <Link
-              href="/records"
-              className="card-elevated p-4 flex flex-col items-center justify-center gap-2 active:scale-98 transition-transform"
-            >
-              <span className="text-2xl">📋</span>
-              <span className="text-sm font-medium">記録を見る</span>
-            </Link>
-            <Link
-              href="/videos"
-              className="card-elevated p-4 flex flex-col items-center justify-center gap-2 active:scale-98 transition-transform"
-            >
-              <span className="text-2xl">⭐</span>
-              <span className="text-sm font-medium">お気に入り</span>
-            </Link>
+          </motion.div>
+        </section>
+
+        {/* Stats Row */}
+        <div className="grid grid-cols-2 gap-4">
+          <div className="glass-card p-4 flex items-center gap-4">
+            <div className="w-12 h-12 bg-orange-500/10 rounded-2xl flex items-center justify-center">
+              <Flame className="text-orange-500 w-6 h-6" />
+            </div>
+            <div>
+              <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest">Streak</p>
+              <p className="text-xl font-display font-bold">7 DAYS</p>
+            </div>
+          </div>
+          <div className="glass-card p-4 flex items-center gap-4">
+            <div className="w-12 h-12 bg-accent/10 rounded-2xl flex items-center justify-center">
+              <Layers className="text-accent w-6 h-6" />
+            </div>
+            <div>
+              <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest">Rank</p>
+              <p className="text-xl font-display font-bold">B3 GRADE</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Search Pulse */}
+        <section className="space-y-4">
+          <div className="flex items-center justify-between px-1">
+            <h3 className="text-[10px] font-bold text-white/40 tracking-[0.2em] uppercase">Explore Pulse</h3>
+            <Link href="/videos" className="text-xs text-primary font-bold hover:underline">VIEW ALL</Link>
+          </div>
+          <div className="relative group">
+            <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/20 to-accent/20 rounded-2xl opacity-0 group-focus-within:opacity-100 transition-opacity blur" />
+            <div className="relative bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 transition-all">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" size={20} />
+              <input 
+                type="text" 
+                placeholder="Search techniques or videos..."
+                className="w-full bg-transparent outline-none text-white placeholder:text-white/20 text-sm"
+              />
+            </div>
           </div>
         </section>
 
-        {/* Recommended Videos */}
-        <section>
-          <div className="flex items-center justify-between mb-3 px-1">
-            <h2 className="text-sm font-medium text-[#666]">おすすめ動画</h2>
-            <Link href="/videos" className="text-sm text-[#0066cc] font-medium">すべて見る</Link>
-          </div>
-          <div className="space-y-3">
-            <Link href="/videos" className="block card p-0 overflow-hidden">
-              <div className="flex">
-                <div className="w-32 h-24 bg-gray-100 flex-shrink-0 flex items-center justify-center">
-                  <span className="text-3xl">🎬</span>
-                </div>
-                <div className="flex-1 p-3">
-                  <h3 className="font-medium text-sm mb-1 line-clamp-2">ホールド保持のコツ</h3>
-                  <span className="tag tag-beginner">初級</span>
-                </div>
-              </div>
-            </Link>
-            <Link href="/videos" className="block card p-0 overflow-hidden">
-              <div className="flex">
-                <div className="w-32 h-24 bg-gray-100 flex-shrink-0 flex items-center justify-center">
-                  <span className="text-3xl">🎬</span>
-                </div>
-                <div className="flex-1 p-3">
-                  <h3 className="font-medium text-sm mb-1 line-clamp-2">スタート位置の極意</h3>
-                  <span className="tag tag-intermediate">中級</span>
-                </div>
-              </div>
-            </Link>
-          </div>
-        </section>
+        {/* Sync Status (Dev only/Small) */}
+        <div className="pt-10 border-t border-white/5">
+          <button 
+            onClick={handleSync}
+            disabled={syncing}
+            className="text-[9px] font-mono flex items-center gap-2 mx-auto text-white/20 hover:text-white/40 transition-colors"
+          >
+            <div className={`w-1.5 h-1.5 rounded-full ${syncing ? 'bg-yellow-400 animate-pulse' : 'bg-green-400/50'}`} />
+            {syncing ? 'SYNCING PULSE...' : (syncStatus || 'CORE ENGINE OPERATIONAL')}
+          </button>
+        </div>
       </main>
 
-      {/* Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
-        <div className="max-w-lg mx-auto flex justify-around h-16">
-          <Link
-            href="/"
-            className="flex-1 flex flex-col items-center justify-center gap-1 text-[#0066cc]"
-          >
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-              <polyline points="9 22 9 12 15 12 15 22" />
-            </svg>
-            <span className="text-xs font-medium">ホーム</span>
+      {/* Navigation */}
+      <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-3rem)] max-w-md z-[100]">
+        <div className="glass-card p-2 flex justify-between items-center shadow-[0_20px_50px_rgba(0,0,0,0.8)] border-white/10">
+          <Link href="/" className="nav-item active px-6 py-3">
+            <Zap size={24} />
+            <span className="text-[9px] font-bold uppercase tracking-tighter">Peak</span>
           </Link>
-          <Link
-            href="/videos"
-            className="flex-1 flex flex-col items-center justify-center gap-1 text-[#999] hover:text-[#0066cc]"
-          >
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <rect width="20" height="14" x="2" y="3" rx="2" ry="2" />
-              <line x1="8" x2="16" y1="21" y2="21" />
-              <line x1="12" x2="12" y1="17" y2="21" />
-            </svg>
-            <span className="text-xs font-medium">動画</span>
+          <Link href="/videos" className="nav-item px-6 py-3 text-white/30 hover:text-white">
+            <Play size={24} />
+            <span className="text-[9px] font-bold uppercase tracking-tighter">Pulse</span>
           </Link>
-          <Link
-            href="/qa"
-            className="flex-1 flex flex-col items-center justify-center gap-1 text-[#999] hover:text-[#0066cc]"
-          >
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="10" />
-              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
-              <path d="M12 17h.01" />
-            </svg>
-            <span className="text-xs font-medium">Q&A</span>
+          <Link href="/qa" className="nav-item px-6 py-3 text-white/30 hover:text-white">
+            <MessageSquare size={24} />
+            <span className="text-[9px] font-bold uppercase tracking-tighter">Coach</span>
           </Link>
-          <Link
-            href="/records"
-            className="flex-1 flex flex-col items-center justify-center gap-1 text-[#999] hover:text-[#0066cc]"
-          >
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
-              <polyline points="14 2 14 8 20 8" />
-            </svg>
-            <span className="text-xs font-medium">記録</span>
+          <Link href="/records" className="nav-item px-6 py-3 text-white/30 hover:text-white">
+            <ClipboardList size={24} />
+            <span className="text-[9px] font-bold uppercase tracking-tighter">Log</span>
           </Link>
         </div>
       </nav>

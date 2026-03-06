@@ -11,7 +11,8 @@ const libsql = createClient({
   authToken: process.env.DATABASE_AUTH_TOKEN,
 });
 
-const adapter = new PrismaLibSql({ client: libsql });
+// The constructor takes the Client object directly in recent versions
+const adapter = new PrismaLibSql(libsql);
 
 export const prisma =
   globalForPrisma.prisma ??
