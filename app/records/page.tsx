@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Play, MessageSquare, ClipboardList, Zap, Plus, X, MapPin, Clock, Calendar, CheckCircle2, ChevronRight, Edit3, Trash2 } from 'lucide-react';
 
 export interface Route {
   grade: string;
@@ -13,7 +15,7 @@ export interface Route {
 export interface PracticeRecord {
   id: string;
   gymName?: string;
-  date: Date;
+  date: string | Date;
   duration?: number;
   practiceMenuId?: string;
   videoId?: string;
@@ -49,16 +51,17 @@ export default function RecordsPage() {
 
   const fetchPracticeMenu = async () => {
     try {
-      const response = await fetch('/api/practice');
+      const response = await fetch('/api/daily-practice');
       const data = await response.json();
-      setPracticeMenu(data.menu || null);
+      const menu = Array.isArray(data) ? data[0] : data;
+      setPracticeMenu(menu ? { id: 'daily', content: menu.greeting } : null);
     } catch (error) {
       console.error('Failed to fetch practice menu:', error);
     }
   };
 
   const handleAddRecord = () => {
-    setCurrentRecord({ id: '', date: new Date(), routes: [] } as PracticeRecord);
+    setCurrentRecord({ id: '', date: new Date().toISOString(), routes: [] } as PracticeRecord);
     setIsModalOpen(true);
   };
 
@@ -112,395 +115,305 @@ export default function RecordsPage() {
     }
   };
 
-  const formatDate = (date: Date) =>
+  const formatDate = (date: string | Date) =>
     new Date(date).toLocaleDateString('ja-JP', { year: 'numeric', month: 'short', day: 'numeric' });
 
   const formatDuration = (minutes?: number) => {
-    if (!minutes) return '未記入';
+    if (!minutes) return '未設定';
     const hours = Math.floor(minutes / 60);
     const mins = minutes % 60;
     return hours > 0 ? `${hours}時間${mins > 0 ? mins + '分' : ''}` : `${mins}分`;
   };
 
   return (
-    <div className="min-h-screen bg-[#fafafa]">
+    <div className="min-h-screen pb-28">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-white border-b border-gray-200">
-        <div className="max-w-lg mx-auto px-4 h-14 flex items-center justify-between">
+      <header className="sticky top-0 z-50 backdrop-blur-md border-b border-white/10 px-6 py-4">
+        <div className="max-w-2xl mx-auto flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            <span className="text-xl font-semibold text-[#0066cc]">Climb</span>
-            <span className="text-xl font-semibold text-[#1a1a1a]">Coach</span>
+            <div className="w-8 h-8 bg-gradient-to-tr from-primary to-accent rounded-lg flex items-center justify-center">
+              <Zap className="text-white w-5 h-5" />
+            </div>
+            <h1 className="text-lg font-display font-black tracking-tighter text-white">
+              SUMMIT PULSE
+            </h1>
           </Link>
           <button
             onClick={handleAddRecord}
-            className="bg-[#0066cc] text-white px-4 py-2 rounded-lg text-sm font-medium"
+            className="p-2 bg-primary/20 text-primary rounded-xl hover:bg-primary/30 transition-colors"
           >
-            新規作成
+            <Plus size={20} />
           </button>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="max-w-lg mx-auto px-4 py-5 pb-20">
-        {/* Today's Practice Menu */}
-        {practiceMenu && (
-          <div className="mb-5">
-            <div className="bg-white border border-gray-200 rounded-2xl p-5">
-              <div className="flex items-center gap-2 mb-3">
-                <span className="text-2xl">🎯</span>
-                <h2 className="font-semibold">今日の練習メニュー</h2>
-              </div>
-              <p className="text-sm text-[#666] mb-3">{practiceMenu.content}</p>
-              <button
-                onClick={() => {
-                  setCurrentRecord({
-                    id: '',
-                    date: new Date(),
-                    practiceMenuId: practiceMenu.id,
-                    routes: [],
-                  } as PracticeRecord);
-                  setIsModalOpen(true);
-                }}
-                className="w-full bg-[#e6f0ff] text-[#0066cc] px-4 py-3 rounded-xl text-sm font-medium"
-              >
-                このメニューで記録
-              </button>
-            </div>
-          </div>
-        )}
+      <main className="max-w-2xl mx-auto px-6 py-8 space-y-8">
+        <header className="space-y-2">
+          <h2 className="text-2xl font-display font-bold text-white">セッションログ</h2>
+          <p className="text-white/40 text-sm">あなたの成長の軌跡</p>
+        </header>
 
         {/* Records List */}
         {records.length === 0 ? (
-          <div className="bg-white border border-gray-200 border-dashed rounded-2xl p-8 text-center">
-            <div className="mb-4">
-              <span className="text-5xl">📝</span>
+          <div className="glass-card p-12 text-center space-y-6">
+            <div className="mx-auto w-16 h-16 bg-white/5 rounded-full flex items-center justify-center">
+              <ClipboardList className="text-white/20" size={32} />
             </div>
-            <h3 className="text-lg font-semibold text-[#1a1a1a] mb-4">まだ記録がありません</h3>
-            <p className="text-sm text-[#999] mb-6">今日の練習を記録しましょう！</p>
+            <div className="space-y-2">
+              <h3 className="text-lg font-bold text-white/80">まだ記録がありません</h3>
+              <p className="text-sm text-white/40">今日の練習を記録して、変化を可視化しましょう</p>
+            </div>
             <button
               onClick={handleAddRecord}
-              className="bg-[#0066cc] text-white px-6 py-3 rounded-xl font-medium"
+              className="neo-button inline-block text-white"
             >
               最初の記録を作成
             </button>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-6">
             {records.map((record) => (
-              <div key={record.id} className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
+              <motion.div 
+                key={record.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="glass-card overflow-hidden"
+              >
                 {/* Card Header */}
-                <div className="p-4 border-b border-gray-100 flex items-center justify-between">
-                  <div>
-                    <h3 className="font-semibold text-[#1a1a1a]">{record.gymName || '未記入'}</h3>
-                    <div className="flex items-center gap-2 text-sm text-[#999] mt-1">
-                      <span>{formatDate(record.date)}</span>
-                      <span>・</span>
-                      <span>{formatDuration(record.duration)}</span>
+                <div className="p-5 border-b border-white/5 bg-white/[0.02] flex items-center justify-between">
+                  <div className="space-y-1">
+                    <h3 className="font-bold text-white/90 flex items-center gap-2">
+                      <MapPin size={14} className="text-primary" />
+                      {record.gymName || 'ホームジム'}
+                    </h3>
+                    <div className="flex items-center gap-4 text-[10px] font-bold uppercase tracking-widest text-white/30">
+                      <div className="flex items-center gap-1">
+                        <Calendar size={12} />
+                        {formatDate(record.date)}
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Clock size={12} />
+                        {formatDuration(record.duration)}
+                      </div>
                     </div>
                   </div>
                   <div className="flex gap-2">
-                    <button
-                      onClick={() => handleEditRecord(record)}
-                      className="text-[#0066cc] text-sm font-medium hover:underline"
-                    >
-                      編集
+                    <button onClick={() => handleEditRecord(record)} className="p-2 text-white/40 hover:text-primary transition-colors">
+                      <Edit3 size={16} />
                     </button>
-                    <button
-                      onClick={() => handleDeleteRecord(record.id)}
-                      className="text-[#ef4444] text-sm font-medium hover:underline"
-                    >
-                      削除
+                    <button onClick={() => handleDeleteRecord(record.id)} className="p-2 text-white/40 hover:text-red-400 transition-colors">
+                      <Trash2 size={16} />
                     </button>
                   </div>
                 </div>
 
                 {/* Routes */}
-                <div className="p-4">
+                <div className="p-5 space-y-4">
                   {record.routes.length > 0 ? (
-                    <div className="space-y-3">
-                      <h4 className="text-sm font-medium text-[#666] mb-3">課題</h4>
-                      {record.routes.map((route, index) => (
-                        <div
-                          key={index}
-                          className={`p-3 rounded-xl border ${
-                            route.success ? 'border-[#bbf7d0] bg-[#f0fdf4]' : 'border-[#fecaca] bg-[#fef2f2]'
-                          }`}
-                        >
-                          <div className="flex items-center gap-3 mb-2">
-                            <span className="text-lg font-bold">{route.grade}</span>
-                            <span className="text-xs text-[#666] bg-gray-100 px-2 py-1 rounded-full">
-                              {route.attempts}回
-                            </span>
-                            <span className={`text-sm font-medium ${
-                              route.success ? 'text-[#166534]' : 'text-[#991b1b]'
-                            }`}>
-                              {route.success ? '成功' : '失敗'}
-                            </span>
+                    <div className="grid gap-3">
+                      {record.routes.map((route, idx) => (
+                        <div key={idx} className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5">
+                          <div className="flex items-center gap-3">
+                            <span className="text-sm font-black text-primary font-display">{route.grade}</span>
+                            <div className="w-1 h-1 rounded-full bg-white/20" />
+                            <span className="text-[10px] font-bold text-white/40 uppercase">{route.attempts} ATTEMPTS</span>
                           </div>
-                          {route.notes && <p className="text-sm text-[#666] mt-1">{route.notes}</p>}
+                          {route.success && <CheckCircle2 size={14} className="text-green-500" />}
                         </div>
                       ))}
                     </div>
                   ) : (
-                    <p className="text-sm text-[#999]">課題はありません</p>
+                    <p className="text-sm text-white/20 italic">課題の記録はありません</p>
                   )}
 
-                  {/* Reflection & Next Goal */}
-                  {(record.reflection || record.nextGoal) && (
-                    <div className="mt-4 pt-4 border-t border-gray-100">
-                      <div className="space-y-3">
-                        {record.reflection && (
-                          <div>
-                            <h4 className="text-sm font-medium text-[#666] mb-2">振り返り</h4>
-                            <p className="text-sm text-[#666] bg-[#fafafa] rounded-lg p-3 border border-gray-100">
-                              {record.reflection}
-                            </p>
-                          </div>
-                        )}
-                        {record.nextGoal && (
-                          <div>
-                            <h4 className="text-sm font-medium text-[#666] mb-2">次回の目標</h4>
-                            <p className="text-sm text-[#666] bg-[#fafafa] rounded-lg p-3 border border-gray-100">
-                              {record.nextGoal}
-                            </p>
-                          </div>
-                        )}
+                  {/* Reflection */}
+                  {record.reflection && (
+                    <div className="pt-2">
+                      <h4 className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em] mb-2">振り返り</h4>
+                      <div className="p-3 bg-white/5 rounded-xl text-xs text-white/60 leading-relaxed">
+                        {record.reflection}
                       </div>
                     </div>
                   )}
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
         )}
       </main>
 
       {/* Modal */}
-      {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-          <div className="bg-white rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
-            <div className="p-5 border-b border-gray-200 flex items-center justify-between">
-              <h2 className="text-lg font-semibold">
-                {currentRecord?.id ? '記録を編集' : '新しい記録を作成'}
-              </h2>
-              <button
-                onClick={() => {
-                  setIsModalOpen(false);
-                  setCurrentRecord(null);
-                }}
-                className="text-[#999] hover:text-[#1a1a1a]"
-              >
-                ✕
-              </button>
-            </div>
-
-            <div className="p-5 space-y-4">
-              {/* Gym Name */}
-              <div>
-                <label className="block text-sm font-medium text-[#1a1a1a] mb-2">ジム名</label>
-                <input
-                  type="text"
-                  value={currentRecord?.gymName || ''}
-                  onChange={(e) => setCurrentRecord({ ...currentRecord!, gymName: e.target.value })}
-                  className="w-full px-4 py-3 bg-[#fafafa] border border-gray-200 rounded-xl focus:outline-none focus:border-[#0066cc]"
-                  placeholder="例: クライミングジムXXX"
-                />
+      <AnimatePresence>
+        {isModalOpen && (
+          <div className="fixed inset-0 z-[110] flex items-center justify-center p-6 sm:p-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsModalOpen(false)}
+              className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="relative w-full max-w-lg glass-card p-0 shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
+            >
+              <div className="p-6 border-b border-white/10 flex items-center justify-between bg-white/[0.02]">
+                <h2 className="text-lg font-bold text-white">
+                  {currentRecord?.id ? '記録を編集' : '新しい記録'}
+                </h2>
+                <button
+                  onClick={() => setIsModalOpen(false)}
+                  className="p-2 text-white/40 hover:text-white transition-colors"
+                >
+                  <X size={20} />
+                </button>
               </div>
 
-              {/* Duration */}
-              <div>
-                <label className="block text-sm font-medium text-[#1a1a1a] mb-2">練習時間（分）</label>
-                <input
-                  type="number"
-                  value={currentRecord?.duration || ''}
-                  onChange={(e) =>
-                    setCurrentRecord({ ...currentRecord!, duration: parseInt(e.target.value) || undefined })
-                  }
-                  className="w-full px-4 py-3 bg-[#fafafa] border border-gray-200 rounded-xl focus:outline-none focus:border-[#0066cc]"
-                  placeholder="例: 90"
-                  min="0"
-                />
-              </div>
+              <div className="p-6 space-y-6 overflow-y-auto">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest">ジム名</label>
+                    <input
+                      type="text"
+                      value={currentRecord?.gymName || ''}
+                      onChange={(e) => setCurrentRecord({ ...currentRecord!, gymName: e.target.value })}
+                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-primary/50 transition-colors"
+                      placeholder="例: B-PUMP"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest">時間 (分)</label>
+                    <input
+                      type="number"
+                      value={currentRecord?.duration || ''}
+                      onChange={(e) =>
+                        setCurrentRecord({ ...currentRecord!, duration: parseInt(e.target.value) || undefined })
+                      }
+                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-primary/50 transition-colors"
+                      placeholder="90"
+                    />
+                  </div>
+                </div>
 
-              {/* Routes */}
-              <div>
-                <label className="block text-sm font-medium text-[#1a1a1a] mb-3">課題</label>
-                <div className="space-y-3">
-                  {(currentRecord?.routes || []).map((route, index) => (
-                    <div key={index} className="p-4 bg-[#fafafa] rounded-xl border border-gray-200">
-                      <div className="grid grid-cols-2 gap-3 mb-3">
-                        <div>
-                          <label className="block text-xs text-[#666] mb-1">グレード</label>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest">課題</label>
+                    <button
+                      onClick={() => {
+                        setCurrentRecord({
+                          ...currentRecord!,
+                          routes: [...(currentRecord?.routes || []), { grade: '', attempts: 1, success: true, notes: '' }],
+                        });
+                      }}
+                      className="text-[10px] font-bold text-primary hover:underline"
+                    >
+                      + 追加
+                    </button>
+                  </div>
+                  <div className="space-y-3">
+                    {(currentRecord?.routes || []).map((route, idx) => (
+                      <div key={idx} className="p-4 bg-white/5 border border-white/5 rounded-2xl relative group">
+                        <div className="grid grid-cols-3 gap-3 mb-3">
                           <input
                             type="text"
                             value={route.grade}
                             onChange={(e) => {
-                              const newRoutes = [...(currentRecord?.routes || [])];
-                              newRoutes[index] = { ...route, grade: e.target.value };
+                              const newRoutes = [...currentRecord!.routes];
+                              newRoutes[idx].grade = e.target.value;
                               setCurrentRecord({ ...currentRecord!, routes: newRoutes });
                             }}
-                            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#0066cc]"
+                            className="bg-white/5 border border-white/10 rounded-lg px-2 py-1.5 text-xs text-white"
                             placeholder="5.10c"
                           />
-                        </div>
-                        <div>
-                          <label className="block text-xs text-[#666] mb-1">試行回数</label>
                           <input
                             type="number"
                             value={route.attempts}
                             onChange={(e) => {
-                              const newRoutes = [...(currentRecord?.routes || [])];
-                              newRoutes[index] = { ...route, attempts: parseInt(e.target.value) || 1 };
+                              const newRoutes = [...currentRecord!.routes];
+                              newRoutes[idx].attempts = parseInt(e.target.value) || 1;
                               setCurrentRecord({ ...currentRecord!, routes: newRoutes });
                             }}
-                            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#0066cc]"
+                            className="bg-white/5 border border-white/10 rounded-lg px-2 py-1.5 text-xs text-white"
                             min="1"
                           />
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3 mb-3">
-                        <label className="flex items-center gap-2 text-sm font-medium text-[#1a1a1a]">
-                          <input
-                            type="checkbox"
-                            checked={route.success}
-                            onChange={(e) => {
-                              const newRoutes = [...(currentRecord?.routes || [])];
-                              newRoutes[index] = { ...route, success: e.target.checked };
+                          <button
+                            onClick={() => {
+                              const newRoutes = [...currentRecord!.routes];
+                              newRoutes[idx].success = !newRoutes[idx].success;
                               setCurrentRecord({ ...currentRecord!, routes: newRoutes });
                             }}
-                            className="h-5 w-5 accent-[#0066cc]"
-                          />
-                          <span>成功した</span>
-                        </label>
-                      </div>
-                      <div>
-                        <label className="block text-xs text-[#666] mb-1">メモ</label>
-                        <textarea
-                          value={route.notes}
-                          onChange={(e) => {
-                            const newRoutes = [...(currentRecord?.routes || [])];
-                            newRoutes[index] = { ...route, notes: e.target.value };
+                            className={`rounded-lg text-[10px] font-bold transition-all ${
+                              route.success ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'
+                            }`}
+                          >
+                            {route.success ? '成功' : '失敗'}
+                          </button>
+                        </div>
+                        <button
+                          onClick={() => {
+                            const newRoutes = currentRecord!.routes.filter((_, i) => i !== idx);
                             setCurrentRecord({ ...currentRecord!, routes: newRoutes });
                           }}
-                          className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#0066cc] resize-none"
-                          rows={2}
-                          placeholder="メモを入力..."
-                        />
+                          className="absolute -top-1 -right-1 p-1 bg-red-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <X size={10} className="text-white" />
+                        </button>
                       </div>
-                      <button
-                        onClick={() => {
-                          const newRoutes = [...(currentRecord?.routes || [])];
-                          newRoutes.splice(index, 1);
-                          setCurrentRecord({ ...currentRecord!, routes: newRoutes });
-                        }}
-                        className="w-full text-[#ef4444] text-sm font-medium py-2 border border-[#fecaca] rounded-lg hover:bg-[#fef2f2] mt-2"
-                      >
-                        課題を削除
-                      </button>
-                    </div>
-                  ))}
-                  <button
-                    onClick={() => {
-                      setCurrentRecord({
-                        ...currentRecord!,
-                        routes: [...(currentRecord?.routes || []), { grade: '', attempts: 1, success: false, notes: '' }],
-                      });
-                    }}
-                    className="w-full text-[#0066cc] text-sm font-medium py-3 border border border-[#b3d9ff] rounded-lg hover:bg-[#e6f0ff]"
-                  >
-                    課題を追加
-                  </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest">振り返り / 目標</label>
+                  <textarea
+                    value={currentRecord?.reflection || ''}
+                    onChange={(e) => setCurrentRecord({ ...currentRecord!, reflection: e.target.value })}
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-primary/50 transition-colors h-24 resize-none"
+                    placeholder="今日の気づきは？"
+                  />
                 </div>
               </div>
 
-              {/* Reflection */}
-              <div>
-                <label className="block text-sm font-medium text-[#1a1a1a] mb-2">振り返り</label>
-                <textarea
-                  value={currentRecord?.reflection || ''}
-                  onChange={(e) => setCurrentRecord({ ...currentRecord!, reflection: e.target.value })}
-                  className="w-full px-4 py-3 bg-[#fafafa] border border-gray-200 rounded-xl focus:outline-none focus:border-[#0066cc] resize-none"
-                  rows={3}
-                  placeholder="今日の練習を振り返ってみよう..."
-                />
-              </div>
-
-              {/* Next Goal */}
-              <div>
-                <label className="block text-sm font-medium text-[#1a1a1a] mb-2">次回の目標</label>
-                <textarea
-                  value={currentRecord?.nextGoal || ''}
-                  onChange={(e) => setCurrentRecord({ ...currentRecord!, nextGoal: e.target.value })}
-                  className="w-full px-4 py-3 bg-[#fafafa] border border-gray-200 rounded-xl focus:outline-none focus:border-[#0066cc] resize-none"
-                  rows={2}
-                  placeholder="次回の目標を設定しよう..."
-                />
-              </div>
-
-              {/* Buttons */}
-              <div className="flex gap-3 pt-4">
+              <div className="p-6 border-t border-white/10 flex gap-3 bg-white/[0.02]">
                 <button
-                  onClick={() => {
-                    setIsModalOpen(false);
-                    setCurrentRecord(null);
-                  }}
-                  className="flex-1 border border-gray-200 text-[#666] px-6 py-3 rounded-xl font-medium hover:bg-gray-50"
+                  onClick={() => setIsModalOpen(false)}
+                  className="flex-1 px-4 py-3 border border-white/10 rounded-xl text-xs font-bold text-white/40 hover:bg-white/5 transition-colors"
                 >
                   キャンセル
                 </button>
-                <button onClick={handleSaveRecord} className="flex-1 bg-[#0066cc] text-white px-6 py-3 rounded-xl font-medium">
-                  保存
+                <button 
+                  onClick={handleSaveRecord}
+                  className="flex-[2] neo-button text-white"
+                >
+                  記録を保存
                 </button>
               </div>
-            </div>
+            </motion.div>
           </div>
-        </div>
-      )}
+        )}
+      </AnimatePresence>
 
-      {/* Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
-        <div className="max-w-lg mx-auto flex justify-around h-16">
-          <Link
-            href="/"
-            className="flex-1 flex flex-col items-center justify-center gap-1 text-[#999] hover:text-[#0066cc]"
-          >
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-              <polyline points="9 22 9 12 15 12 15 22" />
-            </svg>
-            <span className="text-xs font-medium">ホーム</span>
+      {/* Navigation */}
+      <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-3rem)] max-w-md z-[100]">
+        <div className="glass-card p-2 flex justify-between items-center shadow-[0_20px_50px_rgba(0,0,0,0.8)] border-white/10">
+          <Link href="/" className="nav-item px-6 py-3 text-white/30 hover:text-white">
+            <Zap size={24} />
+            <span className="text-[9px] font-bold uppercase tracking-tighter">ホーム</span>
           </Link>
-          <Link
-            href="/videos"
-            className="flex-1 flex flex-col items-center justify-center gap-1 text-[#999] hover:text-[#0066cc]"
-          >
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <rect width="20" height="14" x="2" y="3" rx="2" ry="2" />
-              <line x1="8" x2="16" y1="21" y2="21" />
-              <line x1="12" x2="12" y1="17" y2="21" />
-            </svg>
-            <span className="text-xs font-medium">動画</span>
+          <Link href="/videos" className="nav-item px-6 py-3 text-white/30 hover:text-white">
+            <Play size={24} />
+            <span className="text-[9px] font-bold uppercase tracking-tighter">動画</span>
           </Link>
-          <Link
-            href="/qa"
-            className="flex-1 flex flex-col items-center justify-center gap-1 text-[#999] hover:text-[#0066cc]"
-          >
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="10" />
-              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
-              <path d="M12 17h.01" />
-            </svg>
-            <span className="text-xs font-medium">Q&A</span>
+          <Link href="/qa" className="nav-item px-6 py-3 text-white/30 hover:text-white">
+            <MessageSquare size={24} />
+            <span className="text-[9px] font-bold uppercase tracking-tighter">コーチ</span>
           </Link>
-          <Link
-            href="/records"
-            className="flex-1 flex flex-col items-center justify-center gap-1 text-[#0066cc]"
-          >
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
-              <polyline points="14 2 14 8 20 8" />
-            </svg>
-            <span className="text-xs font-medium">記録</span>
+          <Link href="/records" className="nav-item active px-6 py-3">
+            <ClipboardList size={24} />
+            <span className="text-[9px] font-bold uppercase tracking-tighter">記録</span>
           </Link>
         </div>
       </nav>

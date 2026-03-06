@@ -43,17 +43,17 @@ export default function Home() {
 
   const handleSync = async () => {
     setSyncing(true);
-    setSyncStatus('SYNCING PULSE...');
+    setSyncStatus('パルス同期中...');
     try {
       const response = await fetch('/api/sync', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ channelId: 'UCBtRI97Yh3l6pZzLvBYPq8Q', limit: 5 }),
       });
-      if (response.ok) setSyncStatus('PULSE SYNCED');
-      else setSyncStatus('SYNC FAILED');
+      if (response.ok) setSyncStatus('同期完了');
+      else setSyncStatus('同期失敗');
     } catch (error) {
-      setSyncStatus('ERROR');
+      setSyncStatus('エラー発生');
     } finally {
       setSyncing(false);
     }
@@ -72,7 +72,7 @@ export default function Home() {
               <h1 className="text-xl font-display font-black tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-white to-white/60">
                 SUMMIT PULSE
               </h1>
-              <p className="text-[10px] text-primary font-bold tracking-[0.2em] uppercase">AI Climbing Coach</p>
+              <p className="text-[10px] text-primary font-bold tracking-[0.2em] uppercase">AI クライミングコーチ</p>
             </div>
           </div>
           <div className="flex gap-4">
@@ -92,9 +92,9 @@ export default function Home() {
             className="space-y-2"
           >
             <h2 className="text-3xl font-display font-medium text-white/90">
-              Hello, <span className="text-white font-bold">Climber</span>
+              こんにちは、<span className="text-white font-bold">クライマー</span>
             </h2>
-            <p className="text-white/40 text-sm">Your peak is waiting. Are you ready?</p>
+            <p className="text-white/40 text-sm">頂上が待っている。準備はいいか？</p>
           </motion.div>
         </section>
 
@@ -119,11 +119,10 @@ export default function Home() {
               <button 
                 onClick={() => {
                   setLoading(true);
-                  // Refresh logic would go here
                   location.reload();
                 }}
                 className="p-2 text-white/40 hover:text-white transition-colors"
-                title="Refresh menu"
+                title="メニューを更新"
               >
                 <RefreshCw size={18} />
               </button>
@@ -141,7 +140,7 @@ export default function Home() {
                           <p className="text-white/40 text-[10px] uppercase font-bold tracking-widest">{item.duration}</p>
                           {item.difficulty && (
                             <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-white/5 text-white/30 uppercase tracking-tighter">
-                              {item.difficulty}
+                              {item.difficulty === 'beginner' ? '初級' : item.difficulty === 'intermediate' ? '中級' : '上級'}
                             </span>
                           )}
                         </div>
@@ -153,14 +152,14 @@ export default function Home() {
               ) : (
                 <div className="h-24 flex items-center justify-center border border-dashed border-white/10 rounded-2xl bg-white/[0.02]">
                   <p className="text-white/20 text-sm font-medium animate-pulse">
-                    {loading ? 'ANALYZING PULSE...' : 'No menu available today.'}
+                    {loading ? 'パルスを分析中...' : '今日のメニューはありません'}
                   </p>
                 </div>
               )}
             </div>
 
-            <Link href="/practice" className="neo-button w-full mt-6 text-center block">
-              START SESSION
+            <Link href="/practice" className="neo-button w-full mt-6 text-center block text-white">
+              セッションを開始
             </Link>
           </motion.div>
         </section>
@@ -172,8 +171,8 @@ export default function Home() {
               <Flame className="text-orange-500 w-6 h-6" />
             </div>
             <div>
-              <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest">Streak</p>
-              <p className="text-xl font-display font-bold">7 DAYS</p>
+              <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest">継続日数</p>
+              <p className="text-xl font-display font-bold">7日間</p>
             </div>
           </div>
           <div className="glass-card p-4 flex items-center gap-4">
@@ -181,8 +180,8 @@ export default function Home() {
               <Layers className="text-accent w-6 h-6" />
             </div>
             <div>
-              <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest">Rank</p>
-              <p className="text-xl font-display font-bold">B3 GRADE</p>
+              <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest">ランク</p>
+              <p className="text-xl font-display font-bold">B3 級</p>
             </div>
           </div>
         </div>
@@ -190,8 +189,8 @@ export default function Home() {
         {/* Search Pulse */}
         <section className="space-y-4">
           <div className="flex items-center justify-between px-1">
-            <h3 className="text-[10px] font-bold text-white/40 tracking-[0.2em] uppercase">Explore Pulse</h3>
-            <Link href="/videos" className="text-xs text-primary font-bold hover:underline">VIEW ALL</Link>
+            <h3 className="text-[10px] font-bold text-white/40 tracking-[0.2em] uppercase">動画を探す</h3>
+            <Link href="/videos" className="text-xs text-primary font-bold hover:underline">すべて表示</Link>
           </div>
           <div className="relative group">
             <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/20 to-accent/20 rounded-2xl opacity-0 group-focus-within:opacity-100 transition-opacity blur" />
@@ -199,7 +198,7 @@ export default function Home() {
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" size={20} />
               <input 
                 type="text" 
-                placeholder="Search techniques or videos..."
+                placeholder="テクニックや動画を検索..."
                 className="w-full bg-transparent outline-none text-white placeholder:text-white/20 text-sm"
               />
             </div>
@@ -214,7 +213,7 @@ export default function Home() {
             className="text-[9px] font-mono flex items-center gap-2 mx-auto text-white/20 hover:text-white/40 transition-colors"
           >
             <div className={`w-1.5 h-1.5 rounded-full ${syncing ? 'bg-yellow-400 animate-pulse' : 'bg-green-400/50'}`} />
-            {syncing ? 'SYNCING PULSE...' : (syncStatus || 'CORE ENGINE OPERATIONAL')}
+            {syncing ? 'パルス同期中...' : (syncStatus || 'コアエンジン稼働中')}
           </button>
         </div>
       </main>
@@ -224,19 +223,19 @@ export default function Home() {
         <div className="glass-card p-2 flex justify-between items-center shadow-[0_20px_50px_rgba(0,0,0,0.8)] border-white/10">
           <Link href="/" className="nav-item active px-6 py-3">
             <Zap size={24} />
-            <span className="text-[9px] font-bold uppercase tracking-tighter">Peak</span>
+            <span className="text-[9px] font-bold uppercase tracking-tighter">ホーム</span>
           </Link>
           <Link href="/videos" className="nav-item px-6 py-3 text-white/30 hover:text-white">
             <Play size={24} />
-            <span className="text-[9px] font-bold uppercase tracking-tighter">Pulse</span>
+            <span className="text-[9px] font-bold uppercase tracking-tighter">動画</span>
           </Link>
           <Link href="/qa" className="nav-item px-6 py-3 text-white/30 hover:text-white">
             <MessageSquare size={24} />
-            <span className="text-[9px] font-bold uppercase tracking-tighter">Coach</span>
+            <span className="text-[9px] font-bold uppercase tracking-tighter">コーチ</span>
           </Link>
           <Link href="/records" className="nav-item px-6 py-3 text-white/30 hover:text-white">
             <ClipboardList size={24} />
-            <span className="text-[9px] font-bold uppercase tracking-tighter">Log</span>
+            <span className="text-[9px] font-bold uppercase tracking-tighter">記録</span>
           </Link>
         </div>
       </nav>

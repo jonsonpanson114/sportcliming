@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { motion, AnimatePresence } from 'framer-motion';
+import { MessageSquare, Play, ClipboardList, Zap, Send, Sparkles, RefreshCw, HelpCircle } from 'lucide-react';
 
 export default function QAPage() {
   const [question, setQuestion] = useState('');
@@ -30,10 +32,10 @@ export default function QAPage() {
       if (response.ok) {
         setAnswer(data.answer);
       } else {
-        setError(data.error || '質問に失敗しました');
+        setError(data.error || '質問の送信に失敗しました');
       }
     } catch (e) {
-      setError('エラーが発生しました');
+      setError('通信エラーが発生しました');
     } finally {
       setLoading(false);
     }
@@ -43,124 +45,137 @@ export default function QAPage() {
     'ダイノのコツを教えて',
     '初心者が最初に覚えるべきことは？',
     'フラッグの使い方を教えて',
-    'オブザベーションで気をつけることは？',
+    'オブザベーションの極意は？',
   ];
 
   return (
-    <div className="min-h-screen bg-[#fafafa]">
+    <div className="min-h-screen pb-28">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-white border-b border-gray-200">
-        <div className="max-w-lg mx-auto px-4 h-14 flex items-center justify-between">
+      <header className="sticky top-0 z-50 backdrop-blur-md border-b border-white/10 px-6 py-4">
+        <div className="max-w-2xl mx-auto flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            <span className="text-xl font-semibold text-[#0066cc]">Climb</span>
-            <span className="text-xl font-semibold text-[#1a1a1a]">Coach</span>
+            <div className="w-8 h-8 bg-gradient-to-tr from-primary to-accent rounded-lg flex items-center justify-center">
+              <Zap className="text-white w-5 h-5" />
+            </div>
+            <h1 className="text-lg font-display font-black tracking-tighter text-white">
+              SUMMIT PULSE
+            </h1>
           </Link>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="max-w-lg mx-auto px-4 py-5 pb-20">
-        <h1 className="text-xl font-semibold mb-4">Q&A</h1>
+      <main className="max-max-2xl mx-auto px-6 py-8 space-y-8">
+        <header className="space-y-2">
+          <h2 className="text-2xl font-display font-bold text-white flex items-center gap-2">
+            AI コーチング <Sparkles className="text-primary w-5 h-5" />
+          </h2>
+          <p className="text-white/40 text-sm">理論と経験に基づいたクライミングの知恵</p>
+        </header>
 
         {/* Question Input */}
-        <div className="bg-white border border-gray-200 rounded-2xl p-5 mb-5">
-          <label className="block text-sm font-medium text-[#1a1a1a] mb-3">
-            クライミングについて質問する
-          </label>
-          <textarea
-            value={question}
-            onChange={(e) => setQuestion(e.target.value)}
-            placeholder="例: ダイノのコツを教えて"
-            className="w-full px-4 py-3 bg-[#fafafa] border border-gray-200 rounded-xl focus:outline-none focus:border-[#0066cc] min-h-[120px] resize-none text-sm"
-            disabled={loading}
-          />
-          <button
-            onClick={handleAsk}
-            disabled={loading || !question.trim()}
-            className="w-full mt-3 bg-[#0066cc] text-white px-6 py-3 rounded-xl font-medium disabled:bg-gray-300 disabled:cursor-not-allowed"
-          >
-            {loading ? '考えています...' : '質問する'}
-          </button>
-        </div>
-
-        {/* Answer */}
-        {answer && (
-          <div className="bg-[#e6f0ff] border border-[#b3d9ff] rounded-2xl p-5 mb-5">
-            <div className="flex items-center gap-2 mb-3">
-              <span>🧑‍🏫</span>
-              <h2 className="font-medium text-[#1a1a1a]">コーチの回答</h2>
+        <section>
+          <div className="glass-card p-6 space-y-4">
+            <div className="flex items-center gap-2 text-white/60 mb-2">
+              <HelpCircle size={18} />
+              <span className="text-xs font-bold uppercase tracking-widest">Question</span>
             </div>
-            <p className="text-sm text-[#1a1a1a] whitespace-pre-wrap leading-relaxed">{answer}</p>
+            <textarea
+              value={question}
+              onChange={(e) => setQuestion(e.target.value)}
+              placeholder="例: ダイノのコツを教えて"
+              className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white placeholder:text-white/20 focus:outline-none focus:border-primary/50 transition-colors min-h-[120px] resize-none text-sm"
+              disabled={loading}
+            />
+            <button
+              onClick={handleAsk}
+              disabled={loading || !question.trim()}
+              className="neo-button w-full flex items-center justify-center gap-2 text-white"
+            >
+              {loading ? (
+                <>
+                  <RefreshCw size={18} className="animate-spin" />
+                  <span>思考中...</span>
+                </>
+              ) : (
+                <>
+                  <Send size={18} />
+                  <span>コーチに質問する</span>
+                </>
+              )}
+            </button>
           </div>
-        )}
+        </section>
 
-        {error && (
-          <div className="bg-[#fee2e2] border border-[#fca5a5] rounded-xl p-4 mb-5">
-            <p className="text-sm text-[#991b1b]">{error}</p>
-          </div>
-        )}
+        {/* Answer Area */}
+        <AnimatePresence>
+          {(answer || error) && (
+            <motion.section
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+            >
+              {answer ? (
+                <div className="relative group">
+                  <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/30 to-accent/30 rounded-3xl blur opacity-75" />
+                  <div className="relative glass-card p-6 space-y-4 border-primary/20">
+                    <div className="flex items-center gap-2">
+                      <div className="p-2 bg-primary/20 rounded-lg">
+                        <Sparkles className="text-primary w-4 h-4" />
+                      </div>
+                      <h3 className="text-sm font-bold text-white/80">コーチの分析結果</h3>
+                    </div>
+                    <div className="text-sm text-white/70 leading-relaxed whitespace-pre-wrap">
+                      {answer}
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="glass-card p-4 border-red-500/20 bg-red-500/5 text-center text-red-400 text-sm">
+                  {error}
+                </div>
+              )}
+            </motion.section>
+          )}
+        </AnimatePresence>
 
-        {/* Examples */}
-        <div>
-          <h2 className="text-sm font-medium text-[#666] mb-3">💡 例の質問</h2>
-          <div className="space-y-2">
-            {exampleQuestions.map((q, i) => (
-              <button
-                key={i}
-                onClick={() => setQuestion(q)}
-                className="w-full text-left px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm text-[#666] hover:border-gray-300 active:bg-gray-50"
-              >
-                {q}
-              </button>
-            ))}
-          </div>
-        </div>
+        {/* Example Questions */}
+        {!answer && (
+          <section className="space-y-4 pt-4">
+            <h3 className="text-[10px] font-bold text-white/30 tracking-[0.2em] uppercase px-1">Example Questions</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {exampleQuestions.map((q, i) => (
+                <button
+                  key={i}
+                  onClick={() => setQuestion(q)}
+                  className="text-left p-4 glass-card border-white/5 bg-white/[0.02] hover:bg-white/5 hover:border-white/20 transition-all text-xs text-white/50"
+                >
+                  {q}
+                </button>
+              ))}
+            </div>
+          </section>
+        )}
       </main>
 
-      {/* Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
-        <div className="max-w-lg mx-auto flex justify-around h-16">
-          <Link
-            href="/"
-            className="flex-1 flex flex-col items-center justify-center gap-1 text-[#999] hover:text-[#0066cc]"
-          >
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-              <polyline points="9 22 9 12 15 12 15 22" />
-            </svg>
-            <span className="text-xs font-medium">ホーム</span>
+      {/* Navigation */}
+      <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-3rem)] max-w-md z-[100]">
+        <div className="glass-card p-2 flex justify-between items-center shadow-[0_20px_50px_rgba(0,0,0,0.8)] border-white/10">
+          <Link href="/" className="nav-item px-6 py-3 text-white/30 hover:text-white">
+            <Zap size={24} />
+            <span className="text-[9px] font-bold uppercase tracking-tighter">ホーム</span>
           </Link>
-          <Link
-            href="/videos"
-            className="flex-1 flex flex-col items-center justify-center gap-1 text-[#999] hover:text-[#0066cc]"
-          >
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <rect width="20" height="14" x="2" y="3" rx="2" ry="2" />
-              <line x1="8" x2="16" y1="21" y2="21" />
-              <line x1="12" x2="12" y1="17" y2="21" />
-            </svg>
-            <span className="text-xs font-medium">動画</span>
+          <Link href="/videos" className="nav-item px-6 py-3 text-white/30 hover:text-white">
+            <Play size={24} />
+            <span className="text-[9px] font-bold uppercase tracking-tighter">動画</span>
           </Link>
-          <Link
-            href="/qa"
-            className="flex-1 flex flex-col items-center justify-center gap-1 text-[#0066cc]"
-          >
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="10" />
-              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
-              <path d="M12 17h.01" />
-            </svg>
-            <span className="text-xs font-medium">Q&A</span>
+          <Link href="/qa" className="nav-item active px-6 py-3">
+            <MessageSquare size={24} />
+            <span className="text-[9px] font-bold uppercase tracking-tighter">コーチ</span>
           </Link>
-          <Link
-            href="/records"
-            className="flex-1 flex flex-col items-center justify-center gap-1 text-[#999] hover:text-[#0066cc]"
-          >
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
-              <polyline points="14 2 14 8 20 8" />
-            </svg>
-            <span className="text-xs font-medium">記録</span>
+          <Link href="/records" className="nav-item px-6 py-3 text-white/30 hover:text-white">
+            <ClipboardList size={24} />
+            <span className="text-[9px] font-bold uppercase tracking-tighter">記録</span>
           </Link>
         </div>
       </nav>
