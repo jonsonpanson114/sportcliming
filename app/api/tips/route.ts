@@ -24,7 +24,7 @@ export async function GET(request: Request) {
     });
 
     // videoIdsをパース
-    const tipsWithVideos = tips.map((tip) => ({
+    const tipsWithVideos = tips.map((tip: any) => ({
       ...tip,
       videoIds: tip.videoIds ? JSON.parse(tip.videoIds) : [],
     }));
@@ -72,7 +72,7 @@ export async function POST(request: Request) {
 
       // 既存のコツと重複チェック
       const exists = existingTips.some(
-        (tip) => tip.title === video.title
+        (tip: any) => tip.title === video.title
       );
       if (exists) continue;
 
@@ -103,7 +103,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       created: newTips.length,
-      tips: newTips.map((tip) => ({
+      tips: newTips.map((tip: any) => ({
         ...tip,
         videoIds: JSON.parse(tip.videoIds),
       })),
