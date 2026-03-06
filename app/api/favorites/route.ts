@@ -10,7 +10,7 @@ export async function GET() {
       orderBy: { createdAt: 'desc' },
     });
 
-    const videoIds = favorites.map((f) => f.videoId);
+    const videoIds = favorites.map((f: any) => f.videoId);
     const videos = await prisma.video.findMany({
       where: { youtubeId: { in: videoIds } },
     });
