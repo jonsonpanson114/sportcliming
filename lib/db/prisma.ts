@@ -12,7 +12,7 @@ const libsql = createClient({
 });
 
 // The constructor takes the Client object directly in recent versions
-const adapter = new PrismaLibSql(libsql);
+const adapter = new PrismaLibSql(libsql as any);
 
 export const prisma =
   globalForPrisma.prisma ??
