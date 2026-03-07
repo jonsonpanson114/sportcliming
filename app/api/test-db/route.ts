@@ -4,16 +4,21 @@ import { getPrisma } from '@/lib/db/prisma';
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
+  const version = "v1433-ULTRA-FORCE";
   try {
-    const result = await getPrisma().$queryRaw`SELECT 1 as result`;
+    const db = getPrisma();
+    const result = await db.$queryRaw`SELECT 1 as result`;
     return NextResponse.json({ 
       success: true, 
       result, 
-      timestamp: "2026-03-07 13:30:00 (Latest Force Build)" 
+      version,
+      timestamp: new Date().toISOString()
     });
   } catch (error) {
+    console.error(`[${version}] API Error:`, error);
     return NextResponse.json({ 
       success: false, 
+      version,
       error: error instanceof Error ? error.message : String(error),
       stack: error instanceof Error ? error.stack : undefined
     }, { status: 500 });
