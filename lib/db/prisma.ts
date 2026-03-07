@@ -15,7 +15,13 @@ export const getPrisma = () => {
     return prismaInstance;
   }
 
-  const dbUrl = process.env.DATABASE_URL || 'file:./dev.db';
+  let dbUrl = process.env.DATABASE_URL;
+  
+  if (!dbUrl || dbUrl === 'undefined') {
+    console.warn('[Database] DATABASE_URL is not set or invalid. Falling back to local SQLite.');
+    dbUrl = 'file:./dev.db';
+  }
+  
   const authToken = process.env.DATABASE_AUTH_TOKEN;
 
   try {
