@@ -1,11 +1,12 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/db/prisma';
+import { getPrisma } from '@/lib/db/prisma';
 
 /**
  * GET /api/tips - コツ一覧を取得する
  */
 export async function GET(request: Request) {
   try {
+    const db = getPrisma();
     const { searchParams } = new URL(request.url);
     const category = searchParams.get('category');
     const difficulty = searchParams.get('difficulty');
@@ -18,7 +19,7 @@ export async function GET(request: Request) {
       where.difficulty = difficulty;
     }
 
-    const tips = await prisma.tip.findMany({
+    const tips = await db.tip.findMany({
       where,
       orderBy: { createdAt: 'desc' },
     });
@@ -44,6 +45,7 @@ export async function GET(request: Request) {
  */
 export async function POST(request: Request) {
   try {
+    const db = getPrisma();
     const body = await request.json();
     const { videoIds } = body;
 
@@ -55,7 +57,7 @@ export async function POST(request: Request) {
     }
 
     // 動画を取得
-    const videos = await prisma.video.findMany({
+    const videos = await db.video.findMany({
       where: {
         id: { in: videoIds },
       },
@@ -63,7 +65,7 @@ export async function POST(request: Request) {
     });
 
     // 既存のコツを取得
-    const existingTips = await prisma.tip.findMany();
+    const existingTips = await db.tip.findMany();
 
     const newTips = [];
 
@@ -96,7 +98,7 @@ export async function POST(request: Request) {
 
     // コツを保存
     if (newTips.length > 0) {
-      await prisma.tip.createMany({
+      await db.tip.createMany({
         data: newTips,
       });
     }

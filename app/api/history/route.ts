@@ -1,18 +1,19 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/db/prisma';
+import { getPrisma } from '@/lib/db/prisma';
 
 /**
  * GET /api/history - 視聴履歴を取得する
  */
 export async function GET() {
   try {
-    const history = await prisma.history.findMany({
+    const db = getPrisma();
+    const history = await db.history.findMany({
       orderBy: { watchedAt: 'desc' },
       take: 100,
     });
 
     const videoIds = history.map((h: any) => h.videoId);
-    const videos = await prisma.video.findMany({
+    const videos = await db.video.findMany({
       where: { youtubeId: { in: videoIds } },
     });
 
@@ -31,6 +32,7 @@ export async function GET() {
  */
 export async function POST(request: Request) {
   try {
+    const db = getPrisma();
     const body = await request.json();
     const { videoId } = body;
 
@@ -41,7 +43,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const history = await prisma.history.upsert({
+    const history = await db.history.upsert({
       where: { videoId },
       update: { watchedAt: new Date() },
       create: { videoId },

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/db/prisma';
+import { getPrisma } from '@/lib/db/prisma';
 import { generateText } from '@/lib/gemini/client';
 import { createPracticeMenuPrompt } from '@/lib/gemini/prompts';
 
@@ -8,13 +8,14 @@ import { createPracticeMenuPrompt } from '@/lib/gemini/prompts';
  */
 export async function POST(request: Request) {
   try {
+    const db = getPrisma();
     const body = await request.json();
     const { level, recentVideos } = body;
 
     // 直近の動画内容を取得
     let recentContent = '';
     if (recentVideos && recentVideos.length > 0) {
-      const videos = await prisma.video.findMany({
+      const videos = await db.video.findMany({
         where: {
           id: { in: recentVideos },
         },
@@ -31,7 +32,7 @@ export async function POST(request: Request) {
     const result = await generateText(prompt);
 
     // データベースに保存
-    const practiceMenu = await prisma.practiceMenu.create({
+    const practiceMenu = await db.practiceMenu.create({
       data: { content: result },
     });
 
@@ -53,7 +54,8 @@ export async function POST(request: Request) {
  */
 export async function GET() {
   try {
-    const practiceMenu = await prisma.practiceMenu.findFirst({
+    const db = getPrisma();
+    const practiceMenu = await db.practiceMenu.findFirst({
       orderBy: { createdAt: 'desc' },
     });
 

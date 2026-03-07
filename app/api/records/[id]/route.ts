@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/db/prisma';
+import { getPrisma } from '@/lib/db/prisma';
 
 /**
  * GET /api/records/[id] - 特定の練習記録を取得する
@@ -10,7 +10,7 @@ export async function GET(
 ) {
     try {
         const params = await props.params;
-        const record = await prisma.practiceRecord.findUnique({
+        const record = await getPrisma().practiceRecord.findUnique({
             where: { id: params.id },
         });
 
@@ -43,7 +43,7 @@ export async function PUT(
         const body = await request.json();
         const { gymName, duration, routes, reflection, nextGoal } = body;
 
-        const record = await prisma.practiceRecord.update({
+        const record = await getPrisma().practiceRecord.update({
             where: { id: params.id },
             data: {
                 gymName,
@@ -73,7 +73,7 @@ export async function DELETE(
 ) {
     try {
         const params = await props.params;
-        await prisma.practiceRecord.delete({
+        await getPrisma().practiceRecord.delete({
             where: { id: params.id },
         });
 

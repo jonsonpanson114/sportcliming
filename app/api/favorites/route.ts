@@ -1,17 +1,18 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/db/prisma';
+import { getPrisma } from '@/lib/db/prisma';
 
 /**
  * GET /api/favorites - お気に入り一覧を取得する
  */
 export async function GET() {
   try {
-    const favorites = await prisma.favorite.findMany({
+    const db = getPrisma();
+    const favorites = await db.favorite.findMany({
       orderBy: { createdAt: 'desc' },
     });
 
     const videoIds = favorites.map((f: any) => f.videoId);
-    const videos = await prisma.video.findMany({
+    const videos = await db.video.findMany({
       where: { youtubeId: { in: videoIds } },
     });
 
@@ -30,6 +31,7 @@ export async function GET() {
  */
 export async function POST(request: Request) {
   try {
+    const db = getPrisma();
     const body = await request.json();
     const { videoId } = body;
 
@@ -40,7 +42,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const favorite = await prisma.favorite.create({
+    const favorite = await db.favorite.create({
       data: { videoId },
     });
 
@@ -59,6 +61,7 @@ export async function POST(request: Request) {
  */
 export async function DELETE(request: Request) {
   try {
+    const db = getPrisma();
     const { searchParams } = new URL(request.url);
     const videoId = searchParams.get('videoId');
 
@@ -69,7 +72,7 @@ export async function DELETE(request: Request) {
       );
     }
 
-    await prisma.favorite.deleteMany({
+    await db.favorite.deleteMany({
       where: { videoId },
     });
 

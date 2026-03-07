@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/db/prisma';
+import { getPrisma } from '@/lib/db/prisma';
 
 /**
  * GET /api/videos/[id] - 動画詳細を取得する
@@ -10,7 +10,7 @@ export async function GET(
 ) {
   try {
     const params = await props.params;
-    const video = await prisma.video.findUnique({
+    const video = await getPrisma().video.findUnique({
       where: { id: params.id },
     });
 

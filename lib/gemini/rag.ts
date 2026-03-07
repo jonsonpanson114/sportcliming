@@ -1,6 +1,6 @@
 import { generateText } from './client';
 import { createQAPrompt } from './prompts';
-import { prisma } from '../db/prisma';
+import { getPrisma } from '../db/prisma';
 
 /**
  * 関連する動画を検索する
@@ -14,7 +14,7 @@ export async function retrieveRelevantContext(
     const keywords = extractKeywords(question);
 
     // 動画タイトルや要約から関連する動画を探す
-    const allVideos = await prisma.video.findMany({
+    const allVideos = await getPrisma().video.findMany({
       where: {
         OR: [
           { title: { contains: keywords[0] || '' } },

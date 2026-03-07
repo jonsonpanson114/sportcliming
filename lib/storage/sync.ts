@@ -1,4 +1,4 @@
-import { prisma } from '../db/prisma';
+import { getPrisma } from '../db/prisma';
 import { getUserId, getFavorites, getHistory } from './local';
 
 /**
@@ -6,12 +6,13 @@ import { getUserId, getFavorites, getHistory } from './local';
  */
 export async function syncToCloud(): Promise<{ synced: boolean; error?: string }> {
   try {
+    const db = getPrisma();
     const userId = getUserId();
 
     // お気に入りを同期
     const localFavorites = getFavorites();
     for (const videoId of localFavorites) {
-      await prisma.favorite.upsert({
+      await db.favorite.upsert({
         where: { videoId },
         update: {},
         create: { videoId },
@@ -21,7 +22,7 @@ export async function syncToCloud(): Promise<{ synced: boolean; error?: string }
     // 視聴履歴を同期
     const localHistory = getHistory();
     for (const videoId of localHistory) {
-      await prisma.history.upsert({
+      await db.history.upsert({
         where: { videoId },
         update: {},
         create: { videoId },
@@ -40,12 +41,13 @@ export async function syncToCloud(): Promise<{ synced: boolean; error?: string }
  */
 export async function syncFromCloud(): Promise<{ synced: boolean; error?: string }> {
   try {
+    const db = getPrisma();
     // お気に入りを取得
-    const favorites = await prisma.favorite.findMany();
+    const favorites = await db.favorite.findMany();
     const favoriteIds = favorites.map((f: any) => f.videoId);
 
     // 視聴履歴を取得
-    const history = await prisma.history.findMany();
+    const history = await db.history.findMany();
     const historyIds = history.map((h: any) => h.videoId);
 
     // ローカルストレージに保存

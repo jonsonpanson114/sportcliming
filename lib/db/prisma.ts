@@ -45,5 +45,4 @@ export const getPrisma = () => {
   }
 };
 
-// For backward compatibility while we refactor
-export const prisma = globalForPrisma.prisma || null as any;
+// Everyone must use getPrisma() to ensure proper initialization on Vercel

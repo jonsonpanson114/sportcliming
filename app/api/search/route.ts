@@ -1,11 +1,12 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/db/prisma';
+import { getPrisma } from '@/lib/db/prisma';
 
 /**
  * GET /api/search - 動画を検索する
  */
 export async function GET(request: Request) {
   try {
+    const db = getPrisma();
     const { searchParams } = new URL(request.url);
     const query = searchParams.get('q');
     const page = parseInt(searchParams.get('page') || '1');
@@ -22,7 +23,7 @@ export async function GET(request: Request) {
 
     // タイトルと要約から検索
     const [videos, total] = await Promise.all([
-      prisma.video.findMany({
+      db.video.findMany({
         where: {
           OR: [
             { title: { contains: query } },
@@ -34,7 +35,7 @@ export async function GET(request: Request) {
         take: limit,
         orderBy: { publishedAt: 'desc' },
       }),
-      prisma.video.count({
+      db.video.count({
         where: {
           OR: [
             { title: { contains: query } },

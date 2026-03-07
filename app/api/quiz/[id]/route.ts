@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/db/prisma';
+import { getPrisma } from '@/lib/db/prisma';
 import { generateText } from '@/lib/gemini/client';
 import { createQuizPrompt } from '@/lib/gemini/prompts';
 
@@ -11,9 +11,10 @@ export async function POST(
   props: { params: Promise<{ id: string }> }
 ) {
   try {
+    const db = getPrisma();
     const params = await props.params;
     // 動画を取得
-    const video = await prisma.video.findUnique({
+    const video = await db.video.findUnique({
       where: { id: params.id },
     });
 
@@ -25,7 +26,7 @@ export async function POST(
     }
 
     // すでにクイズがある場合は返す
-    const existingQuiz = await prisma.quiz.findFirst({
+    const existingQuiz = await db.quiz.findFirst({
       where: { videoId: params.id },
     });
 
@@ -56,7 +57,7 @@ export async function POST(
     const quizData = JSON.parse(result);
 
     // データベースに保存
-    const quiz = await prisma.quiz.create({
+    const quiz = await db.quiz.create({
       data: {
         videoId: params.id,
         question: quizData.question,

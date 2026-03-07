@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/db/prisma';
+import { getPrisma } from '@/lib/db/prisma';
 import { generateText, parseJsonResponse } from '@/lib/gemini/client';
 import { createSummaryPrompt, type SummaryResult } from '@/lib/gemini/prompts';
 
@@ -8,6 +8,7 @@ import { createSummaryPrompt, type SummaryResult } from '@/lib/gemini/prompts';
  */
 export async function POST(request: Request) {
   try {
+    const db = getPrisma();
     const body = await request.json();
     const { videoId } = body;
 
@@ -19,7 +20,7 @@ export async function POST(request: Request) {
     }
 
     // 動画を取得
-    const video = await prisma.video.findUnique({
+    const video = await db.video.findUnique({
       where: { id: videoId },
     });
 
@@ -60,7 +61,7 @@ export async function POST(request: Request) {
     }
 
     // データベースに保存
-    await prisma.video.update({
+    await db.video.update({
       where: { id: videoId },
       data: {
         summary: summaryResult.summary,

@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/db/prisma';
+import { getPrisma } from '@/lib/db/prisma';
 
 /**
  * GET /api/records - 練習記録一覧を取得する
  */
 export async function GET() {
   try {
-    const records = await prisma.practiceRecord.findMany({
+    const records = await getPrisma().practiceRecord.findMany({
       orderBy: { date: 'desc' },
       take: 50,
     });
@@ -36,7 +36,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const record = await prisma.practiceRecord.create({
+    const record = await getPrisma().practiceRecord.create({
       data: {
         gymName,
         duration,

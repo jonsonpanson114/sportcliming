@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/db/prisma';
+import { getPrisma } from '@/lib/db/prisma';
 
 export async function GET() {
   try {
-    const result = await prisma.$queryRaw`SELECT 1 as result`;
+    const result = await getPrisma().$queryRaw`SELECT 1 as result`;
     return NextResponse.json({ success: true, result });
   } catch (error) {
     return NextResponse.json({ 

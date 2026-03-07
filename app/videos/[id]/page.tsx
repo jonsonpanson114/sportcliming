@@ -4,7 +4,8 @@
 import { useState, useEffect, use } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, Play, Sparkles, Target, Zap, Clock, Calendar, RefreshCw, AlertCircle, Bookmark, Share2, MessageSquare, ClipboardList } from 'lucide-react';
+import { ChevronLeft, Play, Sparkles, Target, Zap, Clock, Calendar, RefreshCw, AlertCircle, Bookmark, Share2 } from 'lucide-react';
+import { MessageSquare, ClipboardList } from 'lucide-react';
 
 interface Video {
   id: string;

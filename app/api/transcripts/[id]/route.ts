@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/db/prisma';
+import { getPrisma } from '@/lib/db/prisma';
 import { getVideoCaptions } from '@/lib/youtube/transcript';
 
 /**
@@ -10,9 +10,10 @@ export async function GET(
   props: { params: Promise<{ id: string }> }
 ) {
   try {
+    const db = getPrisma();
     const params = await props.params;
     // データベースから動画を取得
-    const video = await prisma.video.findUnique({
+    const video = await db.video.findUnique({
       where: { id: params.id },
     });
 
@@ -44,7 +45,7 @@ export async function GET(
     }
 
     // データベースに保存
-    await prisma.video.update({
+    await db.video.update({
       where: { id: params.id },
       data: { transcript },
     });
