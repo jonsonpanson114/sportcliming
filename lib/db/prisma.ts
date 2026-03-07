@@ -8,8 +8,27 @@ const globalForPrisma = globalThis as unknown as {
 
 let prismaInstance: PrismaClient | undefined;
 
+const FALLBACK_URL = 'libsql://spotcliming-jonsonpanson114.aws-ap-northeast-1.turso.io';
+
+function resolveDatabaseUrl(): string {
+  const raw = process.env.DATABASE_URL?.trim();
+  if (!raw) return FALLBACK_URL;
+
+  const normalized = raw.replace(/^['"]|['"]$/g, '');
+  if (!normalized || normalized.toLowerCase() === 'undefined' || normalized.toLowerCase() === 'null') {
+    return FALLBACK_URL;
+  }
+
+  const isValidScheme =
+    normalized.startsWith('libsql://') ||
+    normalized.startsWith('file:') ||
+    normalized.startsWith('http://') ||
+    normalized.startsWith('https://');
+
+  return isValidScheme ? normalized : FALLBACK_URL;
+}
+
 export const getPrisma = () => {
-  // Avoid initializing Prisma during build/browser phases.
   if (process.env.NEXT_PHASE === 'phase-production-build' || typeof window !== 'undefined') {
     return null as any;
   }
@@ -20,12 +39,9 @@ export const getPrisma = () => {
     return prismaInstance;
   }
 
-  let dbUrl = process.env.DATABASE_URL;
-  const fallbackUrl = 'libsql://spotcliming-jonsonpanson114.aws-ap-northeast-1.turso.io';
-
-  if (!dbUrl || dbUrl === 'undefined') {
-    console.warn('[Database] DATABASE_URL is missing, using fallback URL.');
-    dbUrl = fallbackUrl;
+  const dbUrl = resolveDatabaseUrl();
+  if (dbUrl === FALLBACK_URL) {
+    console.warn('[Database] DATABASE_URL is missing/invalid, using fallback URL.');
   }
 
   const libsql = createClient({
