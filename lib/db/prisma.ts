@@ -17,11 +17,13 @@ export const getPrisma = () => {
 
   let dbUrl = process.env.DATABASE_URL;
   
+  // Build-time guard: Next.js pre-rendering might try to call this during build
+  // when DATABASE_URL is not yet available, causing it to bake in 'undefined'.
   if (!dbUrl || dbUrl === 'undefined' || dbUrl === '') {
-    // If running on Vercel, this is a fatal problem with environment variables
-    if (process.env.VERCEL) {
-       console.error('[Database] FATAL: DATABASE_URL is not set in Vercel. Keys available:', Object.keys(process.env).sort().join(', '));
-       throw new Error(`[Database] DATABASE_URL is missing. Please check Vercel Environment Variables. (Keys: ${Object.keys(process.env).length})`);
+    if (process.env.NEXT_PHASE === 'phase-production-build' || process.env.VERCEL) {
+       console.warn('[Database] Skipping initialization during build/missing env phase.');
+       // We throw a plain error that we can catch, but let's be more descriptive
+       throw new Error(`[Database] Missing DATABASE_URL (detected in phase: ${process.env.NEXT_PHASE || 'unknown'})`);
     }
     dbUrl = 'file:./dev.db';
   }
