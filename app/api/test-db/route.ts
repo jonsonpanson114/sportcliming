@@ -4,7 +4,7 @@ import { getPrisma } from '@/lib/db/prisma';
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
-  const version = "v1814-THE-LAST-STAND";
+  const version = "v1838-JUDGMENT-DAY";
   try {
     const db = getPrisma();
     const result = await db.$queryRaw`SELECT 1 as result`;
