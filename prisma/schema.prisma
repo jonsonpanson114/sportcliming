@@ -5,7 +5,6 @@ generator client {
 
 datasource db {
   provider = "sqlite"
-  url      = "file:./dev.db"
 }
 
 // 動画
@@ -96,3 +95,4 @@ model QASession {
   sources    String?  // JSON: video IDs
   createdAt  DateTime @default(now())
 }
+
