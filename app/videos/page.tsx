@@ -137,9 +137,7 @@ export default function VideosPage() {
                 transition={{ delay: idx * 0.05 }}
               >
                 <Link
-                  href={`https://www.youtube.com/watch?v=${video.youtubeId}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  href={`/videos/${video.id}`}
                   className="group block glass-card overflow-hidden hover:border-primary/30 transition-all p-3"
                 >
                   <div className="flex gap-4">
