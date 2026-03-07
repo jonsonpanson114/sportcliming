@@ -17,15 +17,11 @@ export const getPrisma = () => {
 
   let dbUrl = process.env.DATABASE_URL;
   
-  // Build-time guard: Next.js pre-rendering might try to call this during build
-  // when DATABASE_URL is not yet available, causing it to bake in 'undefined'.
+  const HARDCODED_URL = "libsql://spotcliming-jonsonpanson114.aws-ap-northeast-1.turso.io";
+
   if (!dbUrl || dbUrl === 'undefined' || dbUrl === '') {
-    if (process.env.NEXT_PHASE === 'phase-production-build' || process.env.VERCEL) {
-       console.warn('[Database] Skipping initialization during build/missing env phase.');
-       // We throw a plain error that we can catch, but let's be more descriptive
-       throw new Error(`[Database] Missing DATABASE_URL (detected in phase: ${process.env.NEXT_PHASE || 'unknown'})`);
-    }
-    dbUrl = 'file:./dev.db';
+    console.warn('[Database] DATABASE_URL is missing, using hardcoded fallback.');
+    dbUrl = HARDCODED_URL;
   }
   
   const authToken = process.env.DATABASE_AUTH_TOKEN;
