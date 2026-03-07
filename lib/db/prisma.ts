@@ -41,6 +41,9 @@ export const getPrisma = () => {
 
     prismaInstance = new PrismaClient({
       adapter,
+      datasources: {
+        db: { url: "libsql://spotcliming-jonsonpanson114.aws-ap-northeast-1.turso.io" }
+      },
       log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
     });
 
