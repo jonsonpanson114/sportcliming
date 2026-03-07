@@ -6,7 +6,11 @@ export const dynamic = 'force-dynamic';
 export async function GET() {
   try {
     const result = await getPrisma().$queryRaw`SELECT 1 as result`;
-    return NextResponse.json({ success: true, result });
+    return NextResponse.json({ 
+      success: true, 
+      result, 
+      timestamp: "2026-03-07 13:30:00 (Latest Force Build)" 
+    });
   } catch (error) {
     return NextResponse.json({ 
       success: false, 

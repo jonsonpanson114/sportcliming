@@ -16,13 +16,14 @@ export const getPrisma = () => {
   }
 
   let dbUrl = process.env.DATABASE_URL;
-  const envKeys = Object.keys(process.env).sort().join(', ');
   
   if (!dbUrl || dbUrl === 'undefined' || dbUrl === '') {
-    const errorMsg = `[Database] DATABASE_URL is missing! Available keys: [${envKeys}]`;
-    console.error(errorMsg);
-    // On Vercel, we can't easily see logs, so we put it in the error
-    throw new Error(errorMsg);
+    // If running on Vercel, this is a fatal problem with environment variables
+    if (process.env.VERCEL) {
+       console.error('[Database] FATAL: DATABASE_URL is not set in Vercel. Keys available:', Object.keys(process.env).sort().join(', '));
+       throw new Error(`[Database] DATABASE_URL is missing. Please check Vercel Environment Variables. (Keys: ${Object.keys(process.env).length})`);
+    }
+    dbUrl = 'file:./dev.db';
   }
   
   const authToken = process.env.DATABASE_AUTH_TOKEN;
