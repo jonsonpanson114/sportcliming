@@ -17,8 +17,22 @@ export const getPrisma = () => {
 
   let dbUrl = process.env.DATABASE_URL;
   
-  if (!dbUrl || dbUrl === 'undefined') {
-    console.warn('[Database] DATABASE_URL is not set or invalid. Falling back to local SQLite.');
+  // Extreme logging for Vercel debugging - DO NOT REMOVE UNTIL FIXED
+  console.log('[Database] Debugging DATABASE_URL existence:', {
+    hasUrl: !!dbUrl,
+    urlType: typeof dbUrl,
+    urlValueLength: dbUrl ? dbUrl.length : 0,
+    isUndefinedString: dbUrl === 'undefined',
+    isEmptyString: dbUrl === '',
+    prefix: dbUrl ? dbUrl.substring(0, 10) : 'none'
+  });
+
+  if (!dbUrl || dbUrl === 'undefined' || dbUrl === '') {
+    console.warn('[Database] DATABASE_URL is missing or "undefined" string. Vercel Environment Variables might not be applied correctly.');
+    // Check if we are on Vercel
+    if (process.env.VERCEL) {
+       console.error('[Database] CRITICAL: Running on Vercel but DATABASE_URL is missing! Please check Vercel Settings -> Environment Variables.');
+    }
     dbUrl = 'file:./dev.db';
   }
   
