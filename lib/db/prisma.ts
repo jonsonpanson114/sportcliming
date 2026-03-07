@@ -6,8 +6,15 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
+const dbUrl = process.env.DATABASE_URL || 'file:./dev.db';
+const isRemote = dbUrl.startsWith('libsql://') || dbUrl.startsWith('https://');
+
+if (process.env.NODE_ENV !== 'production') {
+  console.log(`[Database] Connecting to: ${dbUrl.split('@').pop()} (Remote: ${isRemote})`);
+}
+
 const libsql = createClient({
-  url: process.env.DATABASE_URL ?? 'file:./dev.db',
+  url: dbUrl,
   authToken: process.env.DATABASE_AUTH_TOKEN,
 });
 
@@ -17,7 +24,7 @@ const adapter = new PrismaLibSql(libsql as any);
 export const prisma =
   globalForPrisma.prisma ??
   new PrismaClient({
-    adapter,
+    adapter: isRemote ? adapter : undefined,
     log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
   });
 
