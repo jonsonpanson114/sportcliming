@@ -46,7 +46,7 @@ export async function GET(request: Request) {
   } catch (error) {
     console.error('Videos API Error:', error);
     return NextResponse.json(
-      { error: '動画の取得に失敗しました' },
+      { error: '動画の取得に失敗しました', details: error instanceof Error ? error.message : String(error) },
       { status: 500 }
     );
   }

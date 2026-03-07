@@ -37,7 +37,7 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error('QA API Error:', error);
     return NextResponse.json(
-      { error: '回答の生成に失敗しました' },
+      { error: '回答の生成に失敗しました', details: error instanceof Error ? error.message : String(error) },
       { status: 500 }
     );
   }

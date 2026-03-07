@@ -62,7 +62,7 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error('Sync Error:', error);
     return NextResponse.json(
-      { error: '同期に失敗しました' },
+      { error: '同期に失敗しました', details: error instanceof Error ? error.message : String(error) },
       { status: 500 }
     );
   }
