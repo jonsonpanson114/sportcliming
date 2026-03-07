@@ -3,8 +3,12 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   images: {
-    domains: ['img.youtube.com', 'i.ytimg.com'],
+    remotePatterns: [
+      { hostname: 'img.youtube.com' },
+      { hostname: 'i.ytimg.com' },
+    ],
   },
+  serverExternalPackages: ['@prisma/client', '@prisma/adapter-libsql'],
 };
 
 export default nextConfig;
