@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/db/prisma';
+import { getPrisma } from '@/lib/db/prisma';
 import { answerQuestionWithRAG } from '@/lib/gemini/rag';
 
 /**
@@ -21,7 +21,7 @@ export async function POST(request: Request) {
     const { answer, sources, confidence } = await answerQuestionWithRAG(question);
 
     // セッションを保存
-    await prisma.qASession.create({
+    await getPrisma().qASession.create({
       data: {
         question,
         answer,

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getChannelVideos, type Video } from '@/lib/youtube/client';
 import { getVideoCaptions } from '@/lib/youtube/transcript';
-import { prisma } from '@/lib/db/prisma';
+import { getPrisma } from '@/lib/db/prisma';
 import { generateText, parseJsonResponse } from '@/lib/gemini/client';
 import {
   createSummaryPrompt,
@@ -14,6 +14,7 @@ import {
  */
 export async function POST(request: Request) {
   try {
+    const db = getPrisma();
     const body = await request.json().catch(() => ({}));
     const { channelId: bodyChannelId, limit = 10 } = body;
 
@@ -37,7 +38,7 @@ export async function POST(request: Request) {
     }
 
     // Vercelのタイムアウト対策として、未処理の動画を最大3件だけ同期処理する
-    const existingVideos = await prisma.video.findMany({
+    const existingVideos = await db.video.findMany({
       where: {
         youtubeId: { in: allVideos.map((v: any) => v.id) },
         NOT: { summary: null }
@@ -73,8 +74,9 @@ export async function POST(request: Request) {
  */
 export async function GET() {
   try {
+    const db = getPrisma();
     // 処理済みの動画数を取得
-    const processedCount = await prisma.video.count({
+    const processedCount = await db.video.count({
       where: {
         NOT: {
           summary: null,
@@ -82,7 +84,7 @@ export async function GET() {
       },
     });
 
-    const totalCount = await prisma.video.count();
+    const totalCount = await db.video.count();
 
     return NextResponse.json({
       processed: processedCount,
@@ -103,12 +105,13 @@ export async function GET() {
  * 動画を同期的に処理する
  */
 async function processVideos(videos: Video[]) {
+  const db = getPrisma();
   console.log(`[Sync Processing] ${videos.length} 件の動画を処理を開始`);
 
   for (const video of videos) {
     try {
       // 既に存在する場合はスキップ
-      const existing = await prisma.video.findUnique({
+      const existing = await db.video.findUnique({
         where: { youtubeId: video.id },
       });
 
@@ -118,7 +121,7 @@ async function processVideos(videos: Video[]) {
       }
 
       // 動画を保存または更新
-      await prisma.video.upsert({
+      await db.video.upsert({
         where: { youtubeId: video.id },
         update: {
           title: video.title,
@@ -154,7 +157,7 @@ async function processVideos(videos: Video[]) {
 
       if (summaryResult) {
         // 動画を更新
-        await prisma.video.update({
+        await db.video.update({
           where: { youtubeId: video.id },
           data: {
             transcript,
@@ -172,7 +175,7 @@ async function processVideos(videos: Video[]) {
 
         if (tipResult) {
           // コツを保存
-          await prisma.tip.upsert({
+          await db.tip.upsert({
             where: {
               id: `${video.id}-tip`,
             },

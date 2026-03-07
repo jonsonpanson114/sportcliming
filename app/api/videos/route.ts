@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/db/prisma';
+import { getPrisma } from '@/lib/db/prisma';
 
 /**
  * GET /api/videos - 動画一覧を取得する
@@ -24,14 +24,15 @@ export async function GET(request: Request) {
       where.difficultyLevel = level;
     }
 
+    const db = getPrisma();
     const [videos, total] = await Promise.all([
-      prisma.video.findMany({
+      db.video.findMany({
         where,
         skip,
         take: limit,
         orderBy: { publishedAt: 'desc' },
       }),
-      prisma.video.count({ where }),
+      db.video.count({ where }),
     ]);
 
     return NextResponse.json({

@@ -6,25 +6,38 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
-const dbUrl = process.env.DATABASE_URL || 'file:./dev.db';
-const authToken = process.env.DATABASE_AUTH_TOKEN;
+let prismaInstance: PrismaClient;
 
-if (process.env.NODE_ENV !== 'production') {
-  console.log(`[Database] Connecting to: ${dbUrl.split('@').pop()}`);
-}
+export const getPrisma = () => {
+  if (prismaInstance) return prismaInstance;
+  if (globalForPrisma.prisma) {
+    prismaInstance = globalForPrisma.prisma;
+    return prismaInstance;
+  }
 
-const libsql = createClient({
-  url: dbUrl,
-  authToken: authToken,
-});
+  const dbUrl = process.env.DATABASE_URL || 'file:./dev.db';
+  const authToken = process.env.DATABASE_AUTH_TOKEN;
 
-const adapter = new PrismaLibSql(libsql as any);
+  try {
+    const libsql = createClient({
+      url: dbUrl,
+      authToken: authToken,
+    });
 
-export const prisma =
-  globalForPrisma.prisma ??
-  new PrismaClient({
-    adapter,
-    log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
-  });
+    const adapter = new PrismaLibSql(libsql as any);
 
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
+    prismaInstance = new PrismaClient({
+      adapter,
+      log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
+    });
+
+    if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prismaInstance;
+    return prismaInstance;
+  } catch (error) {
+    console.error('Prisma Initialization Error:', error);
+    throw error;
+  }
+};
+
+// For backward compatibility while we refactor
+export const prisma = globalForPrisma.prisma || null as any;
