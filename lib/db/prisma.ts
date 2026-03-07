@@ -40,6 +40,7 @@ export const getPrisma = () => {
   }
 
   const dbUrl = resolveDatabaseUrl();
+  process.env.DATABASE_URL = dbUrl;
   if (dbUrl === FALLBACK_URL) {
     console.warn('[Database] DATABASE_URL is missing/invalid, using fallback URL.');
   }
@@ -62,3 +63,4 @@ export const getPrisma = () => {
 
   return prismaInstance;
 };
+
