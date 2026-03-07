@@ -1,4 +1,5 @@
 'use client';
+// Force rebuild to fix Lucide import issues on Vercel
 
 import { useState, useEffect, use } from 'react';
 import Link from 'next/link';

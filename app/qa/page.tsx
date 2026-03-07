@@ -1,4 +1,5 @@
 'use client';
+// Force rebuild trigger to resolve Vercel deployment cache issues
 
 import { useState } from 'react';
 import Link from 'next/link';
@@ -65,7 +66,7 @@ export default function QAPage() {
       </header>
 
       {/* Main Content */}
-      <main className="max-max-2xl mx-auto px-6 py-8 space-y-8">
+      <main className="max-w-2xl mx-auto px-6 py-8 space-y-8">
         <header className="space-y-2">
           <h2 className="text-2xl font-display font-bold text-white flex items-center gap-2">
             AI コーチング <Sparkles className="text-primary w-5 h-5" />
