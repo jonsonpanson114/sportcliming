@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Search, Trophy, Play, MessageSquare, ClipboardList, Target, Flame, RefreshCw, Layers, Zap, Plus } from 'lucide-react';
+import { Search, Trophy, Play, MessageSquare, ClipboardList, Target, Flame, RefreshCw, Layers, Zap, Plus, Lightbulb } from 'lucide-react';
 
 interface DailyMenu {
   greeting: string;
@@ -204,6 +204,13 @@ export default function Home() {
             <div className="flex items-center justify-center gap-2">
               <Plus className="text-primary w-5 h-5 group-hover:scale-110 transition-transform" />
               <span className="font-bold text-sm text-primary uppercase tracking-widest">セッションを記録する</span>
+            </div>
+          </Link>
+
+          <Link href="/tips" className="block p-4 glass-card border-accent/20 bg-accent/5 hover:bg-accent/10 transition-all text-center group">
+            <div className="flex items-center justify-center gap-2">
+              <Lightbulb className="text-accent w-5 h-5 group-hover:scale-110 transition-transform" />
+              <span className="font-bold text-sm text-accent uppercase tracking-widest">ムーブの極意を見る</span>
             </div>
           </Link>
         </section>
