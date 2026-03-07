@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Play, MessageSquare, ClipboardList, Zap, Plus, X, MapPin, Clock, Calendar, CheckCircle2, ChevronRight, Edit3, Trash2 } from 'lucide-react';
+import { Play, MessageCircle, ClipboardList, Zap, Plus, X, MapPin, Clock, Calendar, CheckCircle2, ChevronRight, Edit3, Trash2 } from 'lucide-react';
 
 export interface Route {
   grade: string;
@@ -71,7 +71,7 @@ export default function RecordsPage() {
   };
 
   const handleDeleteRecord = async (id: string) => {
-    if (!confirm('この記録を削除してもよろしいですか？')) return;
+    if (!confirm('こ�E記録を削除してもよろしぁE��すか�E�E)) return;
     try {
       await fetch(`/api/records/${id}`, { method: 'DELETE' });
       await fetchRecords();
@@ -119,10 +119,10 @@ export default function RecordsPage() {
     new Date(date).toLocaleDateString('ja-JP', { year: 'numeric', month: 'short', day: 'numeric' });
 
   const formatDuration = (minutes?: number) => {
-    if (!minutes) return '未設定';
+    if (!minutes) return '未設宁E;
     const hours = Math.floor(minutes / 60);
     const mins = minutes % 60;
-    return hours > 0 ? `${hours}時間${mins > 0 ? mins + '分' : ''}` : `${mins}分`;
+    return hours > 0 ? `${hours}時間${mins > 0 ? mins + '刁E : ''}` : `${mins}刁E;
   };
 
   return (
@@ -150,17 +150,17 @@ export default function RecordsPage() {
       {/* Main Content */}
       <main className="max-w-2xl mx-auto px-6 py-8 space-y-8">
         <header className="space-y-2">
-          <h2 className="text-2xl font-display font-bold text-white">セッションログ</h2>
-          <p className="text-white/40 text-sm">あなたの成長の軌跡</p>
+          <h2 className="text-2xl font-display font-bold text-white">セチE��ョンログ</h2>
+          <p className="text-white/40 text-sm">あなた�E成長の軌跡</p>
         </header>
 
         {/* Activity Pulse Summary */}
         <section className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="glass-card p-5 bg-gradient-to-br from-primary/10 to-transparent border-primary/20">
-            <p className="text-[10px] font-bold text-primary uppercase tracking-[0.2em] mb-2">総セッション</p>
+            <p className="text-[10px] font-bold text-primary uppercase tracking-[0.2em] mb-2">総セチE��ョン</p>
             <div className="flex items-end gap-2">
               <span className="text-3xl font-display font-black text-white">{records.length}</span>
-              <span className="text-xs text-white/40 mb-1">回</span>
+              <span className="text-xs text-white/40 mb-1">囁E/span>
             </div>
           </div>
           <div className="glass-card p-5 bg-gradient-to-br from-accent/10 to-transparent border-accent/20">
@@ -169,7 +169,7 @@ export default function RecordsPage() {
               <span className="text-3xl font-display font-black text-white">
                 {records.filter(r => new Date(r.date as string).getMonth() === new Date().getMonth()).length}
               </span>
-              <span className="text-xs text-white/40 mb-1">回</span>
+              <span className="text-xs text-white/40 mb-1">囁E/span>
             </div>
           </div>
           <div className="glass-card p-5 bg-gradient-to-br from-orange-500/10 to-transparent border-orange-500/20 text-center sm:text-left">
@@ -207,7 +207,7 @@ export default function RecordsPage() {
             </div>
             <div className="space-y-2">
               <h3 className="text-lg font-bold text-white/80">まだ記録がありません</h3>
-              <p className="text-sm text-white/40">今日の練習を記録して、変化を可視化しましょう</p>
+              <p className="text-sm text-white/40">今日の練習を記録して、変化を可視化しましょぁE/p>
             </div>
           </div>
         ) : (
@@ -224,7 +224,7 @@ export default function RecordsPage() {
                   <div className="space-y-1">
                     <h3 className="font-bold text-white/90 flex items-center gap-2">
                       <MapPin size={14} className="text-primary" />
-                      {record.gymName || 'ホームジム'}
+                      {record.gymName || 'ホ�Eムジム'}
                     </h3>
                     <div className="flex items-center gap-4 text-[10px] font-bold uppercase tracking-widest text-white/30">
                       <div className="flex items-center gap-1">
@@ -263,7 +263,7 @@ export default function RecordsPage() {
                       ))}
                     </div>
                   ) : (
-                    <p className="text-sm text-white/20 italic">課題の記録はありません</p>
+                    <p className="text-sm text-white/20 italic">課題�E記録はありません</p>
                   )}
 
                   {/* Reflection */}
@@ -301,7 +301,7 @@ export default function RecordsPage() {
             >
               <div className="p-6 border-b border-white/10 flex items-center justify-between bg-white/[0.02]">
                 <h2 className="text-lg font-bold text-white">
-                  {currentRecord?.id ? '記録を編集' : '新しい記録'}
+                  {currentRecord?.id ? '記録を編雁E : '新しい記録'}
                 </h2>
                 <button
                   onClick={() => setIsModalOpen(false)}
@@ -314,17 +314,17 @@ export default function RecordsPage() {
               <div className="p-6 space-y-6 overflow-y-auto">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest">ジム名</label>
+                    <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest">ジム吁E/label>
                     <input
                       type="text"
                       value={currentRecord?.gymName || ''}
                       onChange={(e) => setCurrentRecord({ ...currentRecord!, gymName: e.target.value })}
                       className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-primary/50 transition-colors"
-                      placeholder="例: B-PUMP"
+                      placeholder="侁E B-PUMP"
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest">時間 (分)</label>
+                    <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest">時間 (刁E</label>
                     <input
                       type="number"
                       value={currentRecord?.duration || ''}
@@ -339,7 +339,7 @@ export default function RecordsPage() {
 
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest">課題</label>
+                    <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest">課顁E/label>
                     <button
                       onClick={() => {
                         setCurrentRecord({
@@ -388,7 +388,7 @@ export default function RecordsPage() {
                               route.success ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'
                             }`}
                           >
-                            {route.success ? '成功' : '失敗'}
+                            {route.success ? '成功' : '失敁E}
                           </button>
                         </div>
                         <button
@@ -406,12 +406,12 @@ export default function RecordsPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest">振り返り / 目標</label>
+                  <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest">振り返り / 目樁E/label>
                   <textarea
                     value={currentRecord?.reflection || ''}
                     onChange={(e) => setCurrentRecord({ ...currentRecord!, reflection: e.target.value })}
                     className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-primary/50 transition-colors h-24 resize-none"
-                    placeholder="今日の気づきは？"
+                    placeholder="今日の気づき�E�E�E
                   />
                 </div>
               </div>
@@ -427,8 +427,7 @@ export default function RecordsPage() {
                   onClick={handleSaveRecord}
                   className="flex-[2] neo-button text-white"
                 >
-                  記録を保存
-                </button>
+                  記録を保孁E                </button>
               </div>
             </motion.div>
           </div>
@@ -440,15 +439,15 @@ export default function RecordsPage() {
         <div className="glass-card p-2 flex justify-between items-center shadow-[0_20px_50px_rgba(0,0,0,0.8)] border-white/10">
           <Link href="/" className="nav-item px-6 py-3 text-white/30 hover:text-white">
             <Zap size={24} />
-            <span className="text-[9px] font-bold uppercase tracking-tighter">ホーム</span>
+            <span className="text-[9px] font-bold uppercase tracking-tighter">ホ�Eム</span>
           </Link>
           <Link href="/videos" className="nav-item px-6 py-3 text-white/30 hover:text-white">
             <Play size={24} />
             <span className="text-[9px] font-bold uppercase tracking-tighter">動画</span>
           </Link>
           <Link href="/qa" className="nav-item px-6 py-3 text-white/30 hover:text-white">
-            <MessageSquare size={24} />
-            <span className="text-[9px] font-bold uppercase tracking-tighter">コーチ</span>
+            <MessageCircle size={24} />
+            <span className="text-[9px] font-bold uppercase tracking-tighter">コーチE/span>
           </Link>
           <Link href="/records" className="nav-item active px-6 py-3">
             <ClipboardList size={24} />

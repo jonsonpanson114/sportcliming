@@ -4,7 +4,7 @@
 import { useState, useEffect, use } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, Play, Sparkles, Target, Zap, Clock, Calendar, RefreshCw, AlertCircle, Bookmark, Share2, MessageSquare, ClipboardList } from 'lucide-react';
+import { ChevronLeft, Play, Sparkles, Target, Zap, Clock, Calendar, RefreshCw, AlertCircle, Bookmark, Share2, MessageCircle, ClipboardList } from 'lucide-react';
 
 interface Video {
   id: string;
@@ -215,7 +215,7 @@ export default function VideoDetailPage({ params }: { params: Promise<{ id: stri
             <span className="text-[9px] font-bold uppercase tracking-tighter">動画</span>
           </Link>
           <Link href="/qa" className="nav-item px-6 py-3 text-white/30 hover:text-white">
-            <MessageSquare size={24} />
+            <MessageCircle size={24} />
             <span className="text-[9px] font-bold uppercase tracking-tighter">コーチ</span>
           </Link>
           <Link href="/records" className="nav-item px-6 py-3 text-white/30 hover:text-white">

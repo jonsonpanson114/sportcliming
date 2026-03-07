@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Play, MessageSquare, ClipboardList, Zap, Filter, ChevronRight, Search, RefreshCw } from 'lucide-react';
+import { Play, MessageCircle, ClipboardList, Zap, Filter, ChevronRight, Search, RefreshCw } from 'lucide-react';
 
 interface Video {
   id: string;
@@ -47,10 +47,10 @@ export default function VideosPage() {
 
   const getDifficultyLabel = (level: string | null) => {
     switch (level) {
-      case 'beginner': return '初級';
-      case 'intermediate': return '中級';
-      case 'advanced': return '上級';
-      default: return '未設定';
+      case 'beginner': return '初紁E;
+      case 'intermediate': return '中紁E;
+      case 'advanced': return '上紁E;
+      default: return '未設宁E;
     }
   };
 
@@ -74,7 +74,7 @@ export default function VideosPage() {
       <main className="max-w-2xl mx-auto px-6 py-8 space-y-8">
         <header className="space-y-2">
           <h2 className="text-2xl font-display font-bold text-white">動画パルス</h2>
-          <p className="text-white/40 text-sm">最新のテクニックと解説動画</p>
+          <p className="text-white/40 text-sm">最新のチE��ニックと解説動画</p>
         </header>
 
         {/* Filter */}
@@ -93,30 +93,27 @@ export default function VideosPage() {
               filter === 'beginner' ? 'bg-green-500/80 text-white shadow-lg shadow-green-500/20' : 'bg-white/5 text-white/40 border border-white/5'
             }`}
           >
-            初級
-          </button>
+            初紁E          </button>
           <button
             onClick={() => setFilter('intermediate')}
             className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
               filter === 'intermediate' ? 'bg-orange-500/80 text-white shadow-lg shadow-orange-500/20' : 'bg-white/5 text-white/40 border border-white/5'
             }`}
           >
-            中級
-          </button>
+            中紁E          </button>
           <button
             onClick={() => setFilter('advanced')}
             className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
               filter === 'advanced' ? 'bg-red-500/80 text-white shadow-lg shadow-red-500/20' : 'bg-white/5 text-white/40 border border-white/5'
             }`}
           >
-            上級
-          </button>
+            上紁E          </button>
         </div>
 
         {loading ? (
           <div className="h-64 flex flex-col items-center justify-center gap-4">
             <RefreshCw className="text-primary animate-spin" size={32} />
-            <p className="text-white/20 text-sm font-medium">データの波形を読み取り中...</p>
+            <p className="text-white/20 text-sm font-medium">チE�Eタの波形を読み取り中...</p>
           </div>
         ) : error ? (
           <div className="glass-card p-8 text-center space-y-4">
@@ -192,15 +189,15 @@ export default function VideosPage() {
         <div className="glass-card p-2 flex justify-between items-center shadow-[0_20px_50px_rgba(0,0,0,0.8)] border-white/10">
           <Link href="/" className="nav-item px-6 py-3 text-white/30 hover:text-white">
             <Zap size={24} />
-            <span className="text-[9px] font-bold uppercase tracking-tighter">ホーム</span>
+            <span className="text-[9px] font-bold uppercase tracking-tighter">ホ�Eム</span>
           </Link>
           <Link href="/videos" className="nav-item active px-6 py-3">
             <Play size={24} />
             <span className="text-[9px] font-bold uppercase tracking-tighter">動画</span>
           </Link>
           <Link href="/qa" className="nav-item px-6 py-3 text-white/30 hover:text-white">
-            <MessageSquare size={24} />
-            <span className="text-[9px] font-bold uppercase tracking-tighter">コーチ</span>
+            <MessageCircle size={24} />
+            <span className="text-[9px] font-bold uppercase tracking-tighter">コーチE/span>
           </Link>
           <Link href="/records" className="nav-item px-6 py-3 text-white/30 hover:text-white">
             <ClipboardList size={24} />
