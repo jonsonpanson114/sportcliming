@@ -6,21 +6,16 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
-const dbUrl = process.env.DATABASE_URL;
-
-if (!dbUrl && process.env.NODE_ENV === 'production') {
-  throw new Error('DATABASE_URL is not set in production');
-}
-
-const finalDbUrl = dbUrl || 'file:./dev.db';
+const dbUrl = process.env.DATABASE_URL || 'file:./dev.db';
+const authToken = process.env.DATABASE_AUTH_TOKEN;
 
 if (process.env.NODE_ENV !== 'production') {
-  console.log(`[Database] Connecting to: ${finalDbUrl.split('@').pop()}`);
+  console.log(`[Database] Connecting to: ${dbUrl.split('@').pop()}`);
 }
 
 const libsql = createClient({
-  url: finalDbUrl,
-  authToken: process.env.DATABASE_AUTH_TOKEN,
+  url: dbUrl,
+  authToken: authToken,
 });
 
 const adapter = new PrismaLibSql(libsql as any);

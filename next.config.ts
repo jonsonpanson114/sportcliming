@@ -8,7 +8,7 @@ const nextConfig: NextConfig = {
       { hostname: 'i.ytimg.com' },
     ],
   },
-  serverExternalPackages: ['@prisma/client', '@prisma/adapter-libsql'],
+  serverExternalPackages: ['@prisma/client', '@prisma/adapter-libsql', '@libsql/client'],
 };
 
 export default nextConfig;
