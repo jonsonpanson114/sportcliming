@@ -18,6 +18,9 @@ export const getPrisma = () => {
   let dbUrl = process.env.DATABASE_URL;
   
   // Extreme logging for Vercel debugging - DO NOT REMOVE UNTIL FIXED
+  const envKeys = Object.keys(process.env).sort();
+  console.log('[Database] Available Env Keys:', envKeys.join(', '));
+  
   console.log('[Database] Debugging DATABASE_URL existence:', {
     hasUrl: !!dbUrl,
     urlType: typeof dbUrl,
