@@ -33,8 +33,8 @@ export const getPrisma = () => {
 
   try {
     const libsql = createClient({
-      url: dbUrl,
-      authToken: authToken,
+      url: "libsql://spotcliming-jonsonpanson114.aws-ap-northeast-1.turso.io",
+      authToken: process.env.DATABASE_AUTH_TOKEN,
     });
 
     const adapter = new PrismaLibSql(libsql as any);
