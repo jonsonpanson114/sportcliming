@@ -16,27 +16,13 @@ export const getPrisma = () => {
   }
 
   let dbUrl = process.env.DATABASE_URL;
+  const envKeys = Object.keys(process.env).sort().join(', ');
   
-  // Extreme logging for Vercel debugging - DO NOT REMOVE UNTIL FIXED
-  const envKeys = Object.keys(process.env).sort();
-  console.log('[Database] Available Env Keys:', envKeys.join(', '));
-  
-  console.log('[Database] Debugging DATABASE_URL existence:', {
-    hasUrl: !!dbUrl,
-    urlType: typeof dbUrl,
-    urlValueLength: dbUrl ? dbUrl.length : 0,
-    isUndefinedString: dbUrl === 'undefined',
-    isEmptyString: dbUrl === '',
-    prefix: dbUrl ? dbUrl.substring(0, 10) : 'none'
-  });
-
   if (!dbUrl || dbUrl === 'undefined' || dbUrl === '') {
-    console.warn('[Database] DATABASE_URL is missing or "undefined" string. Vercel Environment Variables might not be applied correctly.');
-    // Check if we are on Vercel
-    if (process.env.VERCEL) {
-       console.error('[Database] CRITICAL: Running on Vercel but DATABASE_URL is missing! Please check Vercel Settings -> Environment Variables.');
-    }
-    dbUrl = 'file:./dev.db';
+    const errorMsg = `[Database] DATABASE_URL is missing! Available keys: [${envKeys}]`;
+    console.error(errorMsg);
+    // On Vercel, we can't easily see logs, so we put it in the error
+    throw new Error(errorMsg);
   }
   
   const authToken = process.env.DATABASE_AUTH_TOKEN;
