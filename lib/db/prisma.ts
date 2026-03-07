@@ -9,6 +9,11 @@ const globalForPrisma = globalThis as unknown as {
 let prismaInstance: PrismaClient;
 
 export const getPrisma = () => {
+  // Build-time guard: NEVER initialize during build
+  if (process.env.NEXT_PHASE === 'phase-production-build' || typeof window !== 'undefined') {
+    return null as any;
+  }
+
   if (prismaInstance) return prismaInstance;
   if (globalForPrisma.prisma) {
     prismaInstance = globalForPrisma.prisma;
