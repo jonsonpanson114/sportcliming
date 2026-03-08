@@ -1,5 +1,4 @@
 import type { PrismaClient } from '@prisma/client';
-import { createClient } from '@libsql/client';
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
@@ -45,19 +44,16 @@ export const getPrisma = () => {
     console.warn('[Database] DATABASE_URL is missing/invalid, using fallback URL.');
   }
 
-  const libsql = createClient({
+  const { PrismaLibSql } = require('@prisma/adapter-libsql');
+  const { PrismaClient } = require('@prisma/client');
+
+  const adapter = new PrismaLibSql({
     url: dbUrl,
     authToken: process.env.DATABASE_AUTH_TOKEN,
   });
 
-  const { PrismaLibSql } = require('@prisma/adapter-libsql');
-  const { PrismaClient } = require('@prisma/client');
-
-  const adapter = new PrismaLibSql(libsql as any);
-
   prismaInstance = new PrismaClient({
     adapter,
-    datasourceUrl: dbUrl,
     log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
   });
 
@@ -67,4 +63,3 @@ export const getPrisma = () => {
 
   return prismaInstance;
 };
-
