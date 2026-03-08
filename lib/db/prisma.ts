@@ -57,6 +57,7 @@ export const getPrisma = () => {
 
   prismaInstance = new PrismaClient({
     adapter,
+    datasourceUrl: dbUrl,
     log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
   });
 
@@ -66,3 +67,4 @@ export const getPrisma = () => {
 
   return prismaInstance;
 };
+
