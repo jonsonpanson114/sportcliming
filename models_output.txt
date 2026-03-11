@@ -1,0 +1,12 @@
+[dotenv@17.3.1] injecting env (5) from .env.production -- tip: 笞呻ｸ・ enable debug logging with { debug: true }
+Error listing models: TypeError: genAI.listModels is not a function
+    at listModels (C:\Users\jonso\OneDrive\Desktop\claude\sportcliming\list-models.js:7:32)
+    at Object.<anonymous> (C:\Users\jonso\OneDrive\Desktop\claude\sportcliming\list-models.js:17:1)
+    at Module._compile (node:internal/modules/cjs/loader:1761:14)
+    at Object..js (node:internal/modules/cjs/loader:1893:10)
+    at Module.load (node:internal/modules/cjs/loader:1481:32)
+    at Module._load (node:internal/modules/cjs/loader:1300:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:245:24)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+    at node:internal/main/run_main_module:33:47

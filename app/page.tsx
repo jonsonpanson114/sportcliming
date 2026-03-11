@@ -34,24 +34,34 @@ export default function Home() {
   const [syncing, setSyncing] = useState(false);
   const [syncStatus, setSyncStatus] = useState('');
   const [dailyMenu, setDailyMenu] = useState<DailyMenu | null>(null);
+  const [stats, setStats] = useState({ videos: 0, processed: 0, tips: 0, records: 0, streak: 0 });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchDailyMenu = async () => {
+    const fetchData = async () => {
       try {
-        const response = await fetch('/api/daily-practice');
-        if (!response.ok) return;
-        const data = await response.json();
-        const menuData = Array.isArray(data) ? data[0] : data;
-        setDailyMenu(menuData ?? null);
+        const [menuRes, statsRes] = await Promise.all([
+          fetch('/api/daily-practice'),
+          fetch('/api/stats')
+        ]);
+        
+        if (menuRes.ok) {
+          const data = await menuRes.json();
+          setDailyMenu(data ?? null);
+        }
+        
+        if (statsRes.ok) {
+          const statsData = await statsRes.json();
+          setStats(statsData);
+        }
       } catch (error) {
-        console.error('Failed to fetch daily menu:', error);
+        console.error('Failed to fetch data:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchDailyMenu();
+    fetchData();
   }, []);
 
   const handleSync = async () => {
@@ -74,6 +84,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen pb-28">
+      {/* header remains same */}
       <header className="sticky top-0 z-50 backdrop-blur-md border-b border-white/10 px-6 py-4">
         <div className="max-w-2xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -114,31 +125,48 @@ export default function Home() {
                   <p className="text-white/40 text-xs">AIが分析した最適なトレーニング</p>
                 </div>
               </div>
-              <button onClick={() => location.reload()} className="p-2 text-white/40 hover:text-white transition-colors" title="メニューを更新">
-                <RefreshCw size={18} />
+              <button 
+                onClick={() => { setLoading(true); window.location.reload(); }} 
+                className="p-2 text-white/40 hover:text-white transition-colors" 
+                title="メニューを更新"
+              >
+                <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
               </button>
             </div>
 
             <div className="space-y-4">
               {!loading && dailyMenu?.dailyMenu?.length ? (
                 dailyMenu.dailyMenu.slice(0, 3).map((item, i) => (
-                  <div key={i} className="p-4 bg-white/5 rounded-2xl border border-white/5 flex items-center justify-between">
-                    <div>
-                      <p className="font-bold text-sm">{item.name}</p>
-                      <p className="text-white/40 text-[10px] uppercase font-bold tracking-widest">{item.duration}</p>
+                  <div key={i} className="p-4 bg-white/5 rounded-2xl border border-white/5 flex items-center justify-between group/item hover:bg-white/10 transition-colors">
+                    <div className="flex-1 pr-4">
+                      <p className="font-bold text-sm text-white/90">{item.name}</p>
+                      <p className="text-white/30 text-[10px] line-clamp-1 mt-0.5">{item.description}</p>
                     </div>
-                    <Play className="text-primary/60" size={16} />
+                    <div className="text-right flex flex-col items-end gap-1">
+                      <p className="text-primary text-[9px] font-black uppercase tracking-widest">{item.duration}</p>
+                      <Play className="text-primary/40 group-hover/item:text-primary transition-colors" size={14} />
+                    </div>
                   </div>
                 ))
               ) : (
                 <div className="h-24 flex items-center justify-center border border-dashed border-white/10 rounded-2xl bg-white/[0.02]">
-                  <p className="text-white/20 text-sm font-medium animate-pulse">
+                  <p className="text-white/20 text-sm font-medium">
                     {loading ? 'パルスを分析中...' : '今日のメニューはありません'}
                   </p>
                 </div>
               )}
             </div>
-            <Link href="/practice" className="neo-button w-full mt-6 text-center block text-white">セッションを開始</Link>
+            <Link href="/practice" className="relative group/btn w-full mt-6 block">
+              <div className="absolute -inset-1 bg-gradient-to-r from-primary to-accent rounded-2xl blur opacity-25 group-hover/btn:opacity-50 transition duration-1000 group-hover/btn:duration-200 animate-pulse" />
+              <div className="relative neo-button !bg-slate-900 border-primary/50 w-full text-center py-4 flex items-center justify-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center group-hover/btn:scale-110 transition-transform">
+                  <Play className="text-primary fill-primary" size={16} />
+                </div>
+                <span className="text-xl font-display font-black tracking-widest text-white">
+                  練習を開始する
+                </span>
+              </div>
+            </Link>
           </motion.div>
         </section>
 
@@ -148,11 +176,23 @@ export default function Home() {
             <Link href="/records" className="text-xs text-primary font-bold hover:underline">全記録を見る</Link>
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <div className="glass-card p-5"><Flame className="text-orange-500 w-4 h-4 mb-2" /><p className="text-[10px] text-white/40 font-bold uppercase">継続日数</p><p className="text-2xl font-display font-black text-white">7日</p></div>
-            <div className="glass-card p-5"><Layers className="text-accent w-4 h-4 mb-2" /><p className="text-[10px] text-white/40 font-bold uppercase">最高グレード</p><p className="text-2xl font-display font-black text-white">B3</p></div>
+            <div className="glass-card p-5 border-primary/20 bg-primary/5">
+              <Zap className="text-primary w-4 h-4 mb-2" />
+              <p className="text-[10px] text-white/40 font-bold uppercase tracking-tighter">同期済み動画</p>
+              <p className="text-2xl font-display font-black text-white">{stats.processed}<span className="text-xs text-white/40 ml-1">件</span></p>
+            </div>
+            <div className="glass-card p-5 border-accent/20 bg-accent/5">
+              <Lightbulb className="text-accent w-4 h-4 mb-2" />
+              <p className="text-[10px] text-white/40 font-bold uppercase tracking-tighter">習得したコツ</p>
+              <p className="text-2xl font-display font-black text-white">{stats.tips}<span className="text-xs text-white/40 ml-1">項目</span></p>
+            </div>
           </div>
-          <Link href="/records" className="block p-4 glass-card border-primary/20 bg-primary/5 hover:bg-primary/10 transition-all text-center group"><div className="flex items-center justify-center gap-2"><Plus className="text-primary w-5 h-5" /><span className="font-bold text-sm text-primary uppercase tracking-widest">セッションを記録する</span></div></Link>
-          <Link href="/tips" className="block p-4 glass-card border-accent/20 bg-accent/5 hover:bg-accent/10 transition-all text-center group"><div className="flex items-center justify-center gap-2"><Lightbulb className="text-accent w-5 h-5" /><span className="font-bold text-sm text-accent uppercase tracking-widest">ムーブの極意を見る</span></div></Link>
+          <Link href="/records" className="block p-4 glass-card border-white/10 bg-white/5 hover:bg-white/10 transition-all text-center group">
+            <div className="flex items-center justify-center gap-2">
+              <Plus className="text-primary w-5 h-5" />
+              <span className="font-bold text-sm text-white/90 uppercase tracking-widest">セッションを記録する</span>
+            </div>
+          </Link>
         </section>
 
         <section className="space-y-4">
@@ -160,16 +200,16 @@ export default function Home() {
             <h3 className="text-[10px] font-bold text-white/40 tracking-[0.2em] uppercase">動画を探す</h3>
             <Link href="/videos" className="text-xs text-primary font-bold hover:underline">すべて表示</Link>
           </div>
-          <div className="relative bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" size={20} />
-            <input type="text" placeholder="テクニックや動画を検索..." className="w-full bg-transparent outline-none text-white placeholder:text-white/20 text-sm" />
+          <div className="relative bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 group focus-within:border-primary/50 transition-colors">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-primary transition-colors" size={20} />
+            <input type="text" placeholder={`${stats.videos}件の動画から検索...`} className="w-full bg-transparent outline-none text-white placeholder:text-white/20 text-sm" />
           </div>
         </section>
 
         <div className="pt-10 border-t border-white/5">
           <button onClick={handleSync} disabled={syncing} className="text-[9px] font-mono flex items-center gap-2 mx-auto text-white/20 hover:text-white/40 transition-colors">
             <div className={`w-1.5 h-1.5 rounded-full ${syncing ? 'bg-yellow-400 animate-pulse' : 'bg-green-400/50'}`} />
-            {syncing ? 'パルス同期中...' : (syncStatus || 'コアエンジン稼働中')}
+            {syncing ? 'パルス同期中...' : (syncStatus || `コアエンジン稼働中 - v2.0.2 (Resolved)`)}
           </button>
         </div>
       </main>

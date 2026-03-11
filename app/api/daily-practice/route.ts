@@ -1,103 +1,67 @@
 import { NextResponse } from 'next/server';
+import { getPrisma } from '@/lib/db/prisma';
 
 /**
- * GET /api/daily-practice - 今日の練習メニューを返す（サンプル版）
+ * GET /api/daily-practice - 今日の練習メニューをDBから取得する
  */
 export async function GET() {
   try {
+    const db = getPrisma();
+    
+    // 要約がある動画からランダムに3件抽出
+    // Prisma でランダム取得は少し工夫が必要なので、一度IDを取得してからランダムに選ぶか、
+    // 件数が少なければ全体から取得する。今回は200件程度なので findMany で取得してシャッフルする。
+    const videos = await db.video.findMany({
+      where: {
+        NOT: {
+          summary: null,
+        },
+      },
+      select: {
+        title: true,
+        summary: true,
+        summaryData: true,
+        difficultyLevel: true,
+      },
+      take: 50, // 直近50件から選ぶ
+    });
+
+    if (videos.length === 0) {
+      return NextResponse.json({ greeting: 'まだ解析済みの動画がありません。', dailyMenu: [] });
+    }
+
+    // シャッフルして3つ選ぶ
+    const shuffled = videos.sort(() => 0.5 - Math.random());
+    const selected = shuffled.slice(0, 3);
+
+    const dailyMenu = selected.map((v: any) => {
+      let summaryData = null;
+      try {
+        summaryData = v.summaryData ? JSON.parse(v.summaryData) : null;
+      } catch (e) {
+        console.error('Failed to parse summaryData:', e);
+      }
+      return {
+        name: v.title.length > 20 ? v.title.substring(0, 20) + '...' : v.title,
+        description: summaryData?.keyPoints?.[0] || v.summary?.substring(0, 50) || '具体的な解説は詳細をチェック',
+        duration: '15-20分',
+        category: 'technique',
+        difficulty: v.difficultyLevel || 'beginner',
+      };
+    });
+
     const currentHour = new Date().getHours();
+    const greeting = currentHour < 12 ? 'おはようこそ！最高のセッションを始めようぜ。' : (currentHour < 18 ? 'お疲れ！午後もパルスを上げていこう。' : '夜のクライミングは集中力だ。');
 
-    // 時間帯（午前6時〜12時、午後6時〜12時）
-    const timeOfDay = currentHour < 12 ? 'morning' : (currentHour < 18 ? 'afternoon' : 'evening');
-
-    // サンプルメニュー
-    const sampleMenus = {
-      morning: [
-        {
-          greeting: 'おはようこそ！午前から始めましょう。',
-          dailyMenu: [
-            {
-              name: 'ウォームアップ',
-              description: '関節回転・肩回し・軽いストレッチ',
-              duration: '10分',
-              category: 'warmup',
-              difficulty: 'beginner',
-            },
-            {
-              name: 'フラッグ練習',
-              description: '壁を使ったバランス保持の練習。足を壁に当てて、手が休めるポジションを作る',
-              duration: '15分',
-              category: 'technique',
-              difficulty: 'beginner',
-            },
-            {
-              name: 'ダイノ練習',
-              description: '跳び出しのタイミングとキャッチの練習。低いホールドから始めて、徐々に高さを上げる',
-              duration: '20分',
-              category: 'technique',
-              difficulty: 'intermediate',
-            },
-          ],
-          tips: [
-            'ウォームアップをしっかり行って、怪我を防ぎましょう',
-            'テクニック練習では、質より回数を重視してください',
-            '新しいテクニックを学ぶときは、まずは低い強度で試しましょう',
-          ],
-        },
-      ],
-      afternoon: [
-        {
-          greeting: '午後も頑張りました！',
-          dailyMenu: [
-            {
-              name: 'ハングボード',
-              description: '指先のトレーニング。各フックの保持力を向上させる',
-              duration: '15分',
-              category: 'strength',
-              difficulty: 'beginner',
-            },
-            {
-              name: 'スタミナトレーニング',
-              description: '壁足4点キープとマントルの練習',
-              duration: '20分',
-              category: 'endurance',
-              difficulty: 'intermediate',
-            },
-          ],
-          tips: [
-            'ハングボードでは、握力とテクニックは別です。握力を重視しながら良い効果が得られます',
-            '各フックの後にストレッチを取り入れてください',
-          ],
-        },
-      ],
-      evening: [
-        {
-          greeting: '夜も頑張しましょう！',
-          dailyMenu: [
-            {
-              name: 'スレッチ',
-              description: '筋肉を回復させる。激しいセッションの後にプロテインを取り入れましょう',
-              duration: '15分',
-              category: 'endurance',
-              difficulty: 'intermediate',
-            },
-            {
-              name: 'スタミナトレーニング',
-              description: 'バランスとリカバリーを向上させる。ヨガで体幹を意識して、怪我を防ぎましょう',
-              duration: '20分',
-              category: 'endurance',
-              difficulty: 'beginner',
-            },
-          ],
-          tips: [
-            'スレッチをした後は、十分に水分をとってください',
-            '各ムーブの後にストレッチを入れて、怪我を防ぎましょう',
-          ],
-        },
-      ],
-    };
-
-    return NextResponse.json(sampleMenus[timeOfDay] || sampleMenus.morning);
+    return NextResponse.json({
+      greeting,
+      dailyMenu,
+      tips: [
+        '動画で動きのイメージを焼き付けてから登るのがコツだ。',
+        '無理は禁物だ。怪我をしたら元も子もないからな。',
+        'AIコーチの要約を読み込んで、ムーブを再構成してみろ。'
+      ]
+    });
   } catch (error) {
     console.error('Daily Practice API Error:', error);
     return NextResponse.json(

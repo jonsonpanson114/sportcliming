@@ -1,15 +1,29 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from '@google/generative-ai';
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
-// モデル選択
-export const MODEL = 'gemini-3-flash-preview';
+// モデル選択 (安定動作を優先)
+export const MODEL = 'gemini-1.5-flash';
 
 /**
  * Geminiモデルを取得する
  */
 export function getModel() {
-  return genAI.getGenerativeModel({ model: MODEL });
+  return genAI.getGenerativeModel({
+    model: MODEL,
+    safetySettings: [
+      { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_NONE },
+      { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_NONE },
+      { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_NONE },
+      { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_NONE },
+    ],
+    // Gemini 3 の思考レベル設定
+    generationConfig: {
+      temperature: 1,
+      topP: 0.95,
+      maxOutputTokens: 2048,
+    }
+  });
 }
 
 /**
@@ -25,7 +39,7 @@ export async function generateText(prompt: string): Promise<string> {
     return text;
   } catch (error) {
     console.error('Gemini API Error:', error);
-    throw new Error('テキスト生成に失敗しました');
+    throw new Error(`テキスト生成に失敗しました: ${error instanceof Error ? error.message : String(error)}`);
   }
 }
 

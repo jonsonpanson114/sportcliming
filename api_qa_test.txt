@@ -1,0 +1,2 @@
+Status: 500
+{"error":"蝗樒ｭ斐・逕滓・縺ｫ螟ｱ謨励＠縺ｾ縺励◆","details":"RAG蝗樒ｭ皮函謌舌・蜈ｨ菴薙・繝ｭ繧ｻ繧ｹ縺ｧ螟ｱ謨・ AI逕滓・繝輔ぉ繝ｼ繧ｺ縺ｧ螟ｱ謨・ 繝・く繧ｹ繝育函謌舌↓螟ｱ謨励＠縺ｾ縺励◆: [GoogleGenerativeAI Error]: Error fetching from https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent: [503 Service Unavailable] This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later. (Context: 6901 chars, Videos: 5)"}

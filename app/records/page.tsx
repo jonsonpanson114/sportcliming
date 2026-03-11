@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Play, MessageCircle, ClipboardList, Zap, Trash2, Calendar, Clock } from 'lucide-react';
+import { Play, MessageCircle, ClipboardList, Zap, Trash2, Calendar, Clock, Plus } from 'lucide-react';
 
 interface RouteItem {
   grade: string;
@@ -75,9 +75,14 @@ export default function RecordsPage() {
       </header>
 
       <main className="max-w-2xl mx-auto px-6 py-8 space-y-8">
-        <header className="space-y-2">
-          <h2 className="text-2xl font-display font-bold text-white">セッションログ</h2>
-          <p className="text-white/40 text-sm">あなたの練習記録</p>
+        <header className="flex items-center justify-between gap-4">
+          <div className="space-y-1">
+            <h2 className="text-2xl font-display font-bold text-white">セッションログ</h2>
+            <p className="text-white/40 text-sm">あなたの練習記録</p>
+          </div>
+          <Link href="/records/new" className="p-3 bg-primary rounded-2xl text-white shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-all">
+            <Plus size={24} />
+          </Link>
         </header>
 
         {loading ? (

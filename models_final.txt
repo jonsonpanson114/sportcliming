@@ -1,0 +1,2 @@
+[dotenv@17.3.1] injecting env (5) from .env.production -- tip: 笞呻ｸ・ write to custom object with { processEnv: myObject }
+Error: genAI.listModels is not a function

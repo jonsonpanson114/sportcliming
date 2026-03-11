@@ -1,0 +1,12 @@
+[eval]:1
+require('dotenv').config({ path: '.env.production' }); const { GoogleGenerativeAI } = require('@google/generative-ai'); const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || ''); (async () => { try { const model = genAI.getGenerativeModel({ model: 'gemini-3-flash-preview' }); const res = await model.generateContent('Say exactly \
+                                                                                                                                                                                                                                                                                                                                          ^^^^^^^^^^^^^^
+Invalid string escape
+
+SyntaxError: Invalid or unexpected token
+    at makeContextifyScript (node:internal/vm:194:14)
+    at compileScript (node:internal/process/execution:388:10)
+    at evalTypeScript (node:internal/process/execution:260:22)
+    at node:internal/main/eval_string:71:3
+
+Node.js v24.13.0

@@ -18,6 +18,7 @@ interface Video {
 
 export default function VideosPage() {
   const [videos, setVideos] = useState<Video[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [filter, setFilter] = useState<'all' | 'beginner' | 'intermediate' | 'advanced'>('all');
@@ -29,6 +30,7 @@ export default function VideosPage() {
         if (response.ok) {
           const data = await response.json();
           setVideos(data.videos || []);
+          setTotalCount(data.pagination?.total || 0);
         } else {
           setError('動画の取得に失敗しました');
         }
@@ -72,7 +74,7 @@ export default function VideosPage() {
       <main className="max-w-2xl mx-auto px-6 py-8 space-y-8">
         <header className="space-y-2">
           <h2 className="text-2xl font-display font-bold text-white">動画パルス</h2>
-          <p className="text-white/40 text-sm">最新のテクニックと解説動画</p>
+          <p className="text-white/40 text-sm">{totalCount > 0 ? `${totalCount}件の解析済み動画` : '最新のテクニックと解説動画'}</p>
         </header>
 
         <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">

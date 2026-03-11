@@ -10,28 +10,51 @@ export async function retrieveRelevantContext(
   limit: number = 5
 ): Promise<{ videos: any[]; context: string }> {
   try {
-    // 簡単なキーワード検索
+    // 強化されたキーワード検索
     const keywords = extractKeywords(question);
+    const OR = keywords.flatMap(kw => [
+      { title: { contains: kw } },
+      { summary: { contains: kw } },
+      { summaryData: { contains: kw } }
+    ]);
 
     // 動画タイトルや要約から関連する動画を探す
     const allVideos = await getPrisma().video.findMany({
-      where: {
-        OR: [
-          { title: { contains: keywords[0] || '' } },
-          { summary: { contains: keywords[0] || '' } },
-        ],
-      },
+      where: { OR },
       take: limit,
+      orderBy: { publishedAt: 'desc' },
     });
 
-    // コンテキストを作成
+    // コンテキストを作成（詳細データを含める）
     const context = allVideos
-      .map((video: any) => `動画: ${video.title}\n要約: ${video.summary || 'なし'}\n`)
+      .map((video: any) => {
+        let details = video.summary || 'なし';
+        if (video.summaryData) {
+          try {
+            const parsed = typeof video.summaryData === 'string' ? JSON.parse(video.summaryData) : video.summaryData;
+            
+            // keyPoints を展開
+            if (parsed.keyPoints && Array.isArray(parsed.keyPoints)) {
+              details += `\nポイント: ${parsed.keyPoints.map((p: any) => typeof p === 'object' ? (p.title || p.description || JSON.stringify(p)) : p).join(', ')}`;
+            }
+            
+            // techniques を展開 (object の場合も考慮)
+            if (parsed.techniques && Array.isArray(parsed.techniques)) {
+              details += `\nテクニック: ${parsed.techniques.map((t: any) => typeof t === 'object' ? `${t.name || t.title}: ${t.description || ''}` : t).join(', ')}`;
+            }
+          } catch (e) {
+            // fallback to raw if parse fails
+            details += `\n詳細情報: ${video.summaryData}`;
+          }
+        }
+        return `動画: ${video.title}\n内容: ${details}\n`;
+      })
       .join('\n');
 
     return {
       videos: allVideos,
       context,
+      keywords,
     };
   } catch (error) {
     console.error('RAG Error:', error);
@@ -43,12 +66,28 @@ export async function retrieveRelevantContext(
  * 質問からキーワードを抽出する
  */
 function extractKeywords(question: string): string[] {
-  // 簡単なキーワード抽出（実装は改善可能）
-  const keywords = question
-    .split(/[\s、。、？?！!]+/)
-    .filter((word: string) => word.length > 1);
+  // 不要な言葉や助詞を徹底的に除外
+  const stopWords = [
+    '教えて', 'とは', 'どうやって', 'やり方', 'コツ', 'について', 'ください', 'ありますか', 
+    'の', 'は', 'が', 'を', 'に', 'へ', 'と', 'で', 'も', 'だ', 'か', 'な'
+  ];
+  
+  let cleaned = question;
+  // 長い単語から先に置換
+  stopWords.sort((a, b) => b.length - a.length).forEach(sw => { 
+    cleaned = cleaned.replace(new RegExp(sw, 'g'), ' '); 
+  });
 
-  return keywords.slice(0, 3);
+  const keywords = cleaned
+    .split(/[\s、。、？?！!]+/)
+    .filter((word: string) => word.length >= 1);
+
+  // もしキーワードが空になったら元のクエリから抽出を試みる
+  if (keywords.length === 0) {
+    return [question.substring(0, 10)];
+  }
+
+  return keywords.slice(0, 8); // キーワード数を増やしてヒット率を上げる
 }
 
 /**
@@ -60,12 +99,12 @@ export async function answerQuestionWithRAG(question: string): Promise<{
   confidence: number;
 }> {
   try {
-    // 関連するコンテキストを取得
-    const { videos, context } = await retrieveRelevantContext(question);
+    // コンテキストを取得
+    const { videos, context, keywords } = await retrieveRelevantContext(question);
 
     if (context.length === 0) {
       return {
-        answer: '申し訳ありませんが、提供された情報にはその内容が含まれていません。別の質問をお試しください。',
+        answer: `申し訳ありませんが、提供された情報（キーワード: ${keywords.join(', ')}) にはその内容が含まれていません。別の質問をお試しください。`,
         sources: [],
         confidence: 0,
       };
@@ -74,22 +113,27 @@ export async function answerQuestionWithRAG(question: string): Promise<{
     // プロンプトを作成
     const prompt = createQAPrompt(question, context);
 
-    // 回答を生成
-    const answer = await generateText(prompt);
+    try {
+      // 回答を生成
+      const answer = await generateText(prompt);
 
-    // ソースを取得
-    const sources = videos.map((v: any) => v.youtubeId);
+      // ソースを取得
+      const sources = videos.map((v: any) => v.youtubeId);
 
-    // 信頼度を計算（簡易版）
-    const confidence = videos.length >= 2 ? 0.8 : videos.length === 1 ? 0.6 : 0.4;
+      // 信頼度を計算
+      const confidence = videos.length >= 2 ? 0.8 : videos.length === 1 ? 0.6 : 0.4;
 
-    return {
-      answer,
-      sources,
-      confidence,
-    };
+      return {
+        answer,
+        sources,
+        confidence,
+      };
+    } catch (genError) {
+      const msg = genError instanceof Error ? genError.message : String(genError);
+      throw new Error(`AI生成フェーズで失敗: ${msg} (Context: ${context.length} chars, Videos: ${videos.length})`);
+    }
   } catch (error) {
     console.error('RAG Answer Error:', error);
-    throw new Error('回答生成に失敗しました');
+    throw new Error(`RAG回答生成の全体プロセスで失敗: ${error instanceof Error ? error.message : String(error)}`);
   }
 }
