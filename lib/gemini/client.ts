@@ -2,8 +2,8 @@ import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from '@google/ge
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
-// モデル選択 (安定動作を優先)
-export const MODEL = 'gemini-1.5-flash';
+// モデル選択 (プロジェクト規則: gemini-3-flash)
+export const MODEL = 'gemini-3-flash';
 
 /**
  * Geminiモデルを取得する
